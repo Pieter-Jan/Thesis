@@ -165,7 +165,7 @@ def Jacobian_COB(X_B, q_a):
   P_L = RelativeFootPositions(q_a)
 
   # Get the current rotation of the body from the position of feet 2 - 4
-  R_B = RotationMatrix(P_L[:,2].T, P_L[:,0].T, P_L[:,1].T)
+  R_B = RotationMatrix(P_L[:,1].T, P_L[:,3].T, P_L[:,2].T)
 
   # Position of 4 feet in global system
   P_G = X_B_4 + R_B*P_L
@@ -378,14 +378,16 @@ def Relative_COB(q_start, q_current, swingLeg=1):
   # swingLeg: leg that is not on the ground
 
   P_start = RelativeFootPositions(q_start)
-  P_current = RelativeFootPositions(q_current)
-  
-  if swingLeg is 1:
-    A = numpy.linalg.norm(P_current[:,1])
-    B = numpy.linalg.norm(P_current[:,2])
-    C = numpy.linalg.norm(P_current[:,3])
+  P_start = numpy.delete(P_start, swingLeg-1, axis=1)
 
-    return Trilateration(P_start[:,1], P_start[:,2], P_start[:,3], A, B, C)
+  P_current = RelativeFootPositions(q_current)
+  P_current = numpy.delete(P_current, swingLeg-1, axis=1)
+  
+  A = numpy.linalg.norm(P_current[:,0])
+  B = numpy.linalg.norm(P_current[:,1])
+  C = numpy.linalg.norm(P_current[:,2])
+
+  return Trilateration(P_start[:,0], P_start[:,1], P_start[:,2], A, B, C)
 
 def SupportPolygon_Centroid(q_current, swingLeg=1):
   feet = RelativeFootPositions(q_current)

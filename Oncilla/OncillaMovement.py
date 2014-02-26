@@ -47,7 +47,7 @@ def Move_COB(oncilla, X_goal, q_init, q_ref, speed):
       return None
 
     X_current = OK.Relative_COB(q_ref, q_current, swingLeg) 
-    print X_current.T
+    #print X_current.T
 
   return q_current
 

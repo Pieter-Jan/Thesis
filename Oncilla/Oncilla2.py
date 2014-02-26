@@ -12,8 +12,8 @@ import OncillaVisualization as OV
 import pygame
 from pygame.locals import *
 
-XDIM = 1000
-YDIM = 500
+XDIM = 850
+YDIM = 400
 WINSIZE = [XDIM, YDIM]
 
 class OncillaHardware:
@@ -30,6 +30,8 @@ class OncillaHardware:
   
     SIMULATION = False
     screen = None
+    showSupportPolygon = False
+    swingLeg = 1
  
     """ This connects to a robot-server, found on IP:PORT
      The robot's position will start on the position corresponding to the command {1:[0,135,0],2:[0,135,0],3:[0,135,0],4:[0,135,0]}"""
@@ -73,7 +75,7 @@ class OncillaHardware:
         return data
 
       else:
-        OV.VisualizeRobot(self, q)
+        OV.VisualizeRobot(self, q, swingLeg = self.swingLeg, showSupportPolygon=self.showSupportPolygon)
 
     def getConfiguration(self):
       # Get q
