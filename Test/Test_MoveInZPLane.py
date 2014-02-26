@@ -33,10 +33,12 @@ raw_input("Press key to continue")
 
 speed = 20.0
 
-q = q_start
-for i in range(0, 10):
-  X_goal = numpy.matrix([[0.0],[0.0],[0.0]])
+X_goal = numpy.matrix([[20.0],[0.0],[0.0]])
+q = OM.Move_COB(oh, X_goal, q_start, q_start, speed)
+
+for i in range(0, 5):
+  X_goal = numpy.matrix([[20.0],[0.0],[15.0]])
   q = OM.Move_COB(oh, X_goal, q, q_start, speed)
 
-  X_goal = numpy.matrix([[30.0],[0.0],[0.0]])
+  X_goal = numpy.matrix([[20.0],[0.0],[-15.0]])
   q = OM.Move_COB(oh, X_goal, q, q_start, speed)

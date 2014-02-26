@@ -6,21 +6,16 @@ from matplotlib.patches import Polygon
 from scipy.optimize import fsolve
 
 # Leg parameters
-A1 = A2 = 60.0
-B1 = B2 = 56.0
-C1 = C2 = 62.5
-A3 = A4 = 78.0
-B3 = B4 = 65.0
-C3 = C4 = 52.0
+As = [60.0, 60.0, 78.0, 78.0]
+Bs = [56.0, 56.0, 65.0, 65.0]
+Cs = [62.5, 62.0, 52.0, 52.0]
 
 # Position of legs within robot
 d1 = 227.0
 d2 = 137.5
-Q1 = Q2 = Q3 = Q4 = 0.0
-R1 = R2 = d1/2.0
-R3 = R4 = -d1/2.0
-S1 = S3 = -d2/2.0
-S2 = S4 = d2/2.0
+Qs = [0.0, 0.0, 0.0, 0.0]
+Rs = [d1/2.0, d1/2.0, -d1/2.0, -d1/2.0]
+Ss = [-d2/2.0, d2/2.0, -d2/2.0, d2/2.0]
 
 # Angle limits
 alpha_min = [-43./180.*math.pi, -43./180.*math.pi, -43./180.*math.pi, -43./180.*math.pi]
@@ -81,18 +76,13 @@ def DH_ANKLE(beta, C):
 
 def Jacobian_SL(alpha, beta, gamma, leg):
 
-  if leg == 1:
-    A, B, C = (A1, B1, C1)
-    flip = True
-  elif leg == 2:
-    A, B, C = (A2, B2, C2)
+  if leg == 1 or leg == 3:
     flip = False
-  elif leg == 3:
-    A, B, C = (A3, B3, C3)
+
+  else:
     flip = True
-  elif leg == 4:
-    A, B, C = (A4, B4, C4)
-    flip = False
+
+  A, B, C, Q, R, S = As[leg-1], Bs[leg-1], Cs[leg-1], Qs[leg-1], Rs[leg-1], Ss[leg-1]
 
   if not flip:
     J = numpy.matrix([[(-(A+C)*math.sin(alpha)+B*math.sin(alpha+beta))*math.sin(gamma), B*math.sin(alpha+beta)*math.sin(gamma), ((A+C)*math.cos(alpha)-B*math.cos(alpha+beta))*math.cos(gamma)], 
@@ -106,38 +96,55 @@ def Jacobian_SL(alpha, beta, gamma, leg):
 
   return J
 
-def ForwardKinematics_SL(alpha, beta, gamma, leg):
+def FootPositions_SL(alpha, beta, gamma, leg):
   # Calculates the foot position of leg i: P_L_i
 
-  if leg == 1:
-    A, B, C, Q, R, S = (A1, B1, C1, Q1, R1, S1)
-    flip = True
-
-  elif leg == 2:
-    A, B, C, Q, R, S = (A2, B2, C2, Q2, R2, S2)
+  if leg == 1 or leg == 3:
     flip = False
 
-  elif leg == 3:
-    A, B, C, Q, R, S = (A3, B3, C3, Q3, R3, S3)
+  else:
     flip = True
 
-  elif leg == 4:
-    A, B, C, Q, R, S = (A4, B4, C4, Q4, R4, S4)
+  A, B, C, Q, R, S = As[leg-1], Bs[leg-1], Cs[leg-1], Qs[leg-1], Rs[leg-1], Ss[leg-1]
+
+  P_F_i = DH_BODY(Q, R, S, flip)*DH_SERVO(gamma)*DH_HIP(alpha, A)*DH_KNEE(beta, B)*DH_ANKLE(beta, C)*numpy.matrix('0.0; 0.0; 0.0; 1.0') 
+
+  return P_F_i[0:3]
+
+def KneePositions_SL(alpha, beta, gamma, leg):
+  # Calculates the knee position of leg i: P_L_i
+
+  if leg == 1 or leg == 3:
     flip = False
 
-  P_L_i = DH_BODY(Q, R, S, flip)*DH_SERVO(gamma)*DH_HIP(alpha, A)*DH_KNEE(beta, B)*DH_ANKLE(beta, C)*numpy.matrix('0.0; 0.0; 0.0; 1.0') 
+  else:
+    flip = True
 
-  return P_L_i[0:3]
+  A, B, C, Q, R, S = As[leg-1], Bs[leg-1], Cs[leg-1], Qs[leg-1], Rs[leg-1], Ss[leg-1]
+
+  P_K_i = DH_BODY(Q, R, S, flip)*DH_SERVO(gamma)*DH_HIP(alpha, A)*numpy.matrix('0.0; 0.0; 0.0; 1.0') 
+
+  return P_K_i[0:3]
 
 def RelativeFootPositions(q_a):
-  P_L_1 = ForwardKinematics_SL(q_a[0], q_a[1], q_a[2], 1)
-  P_L_2 = ForwardKinematics_SL(q_a[3], q_a[4], q_a[5], 2)
-  P_L_3 = ForwardKinematics_SL(q_a[6], q_a[7], q_a[8], 3)
-  P_L_4 = ForwardKinematics_SL(q_a[9], q_a[10], q_a[11], 4)
+  P_K_1 = FootPositions_SL(q_a[0], q_a[1], q_a[2], 1)
+  P_K_2 = FootPositions_SL(q_a[3], q_a[4], q_a[5], 2)
+  P_K_3 = FootPositions_SL(q_a[6], q_a[7], q_a[8], 3)
+  P_K_4 = FootPositions_SL(q_a[9], q_a[10], q_a[11], 4)
   
-  P_L = numpy.hstack([P_L_1, P_L_2, P_L_3, P_L_4])
+  P_F = numpy.hstack([P_K_1, P_K_2, P_K_3, P_K_4])
 
-  return P_L
+  return P_F
+
+def RelativeKneePositions(q_a):
+  P_K_1 = KneePositions_SL(q_a[0], q_a[1], q_a[2], 1)
+  P_K_2 = KneePositions_SL(q_a[3], q_a[4], q_a[5], 2)
+  P_K_3 = KneePositions_SL(q_a[6], q_a[7], q_a[8], 3)
+  P_K_4 = KneePositions_SL(q_a[9], q_a[10], q_a[11], 4)
+  
+  P_K = numpy.hstack([P_K_1, P_K_2, P_K_3, P_K_4])
+
+  return P_K
 
 def Jacobian_LegLengths(q_a):
   J_leg1 = Jacobian_SL(q_a[0], q_a[1], q_a[2], 1)    
@@ -401,12 +408,11 @@ def Visualize_SupportPolygon(q_start, swingLeg=1):
 
   # Centroid of support triangle
   yc, zc = SupportPolygon_Centroid(q_start, swingLeg)
-  print yc, zc
   ax.plot(yc, zc, 'go')
 
   ax.add_patch(Polygon(feet.T, closed=True, alpha=0.6))
-  ax.set_xlim([-200, 200])
-  ax.set_ylim([-100, 100])
+  ax.set_xlim([-200.0, 200.0])
+  ax.set_ylim([-100.0, 100.0])
   ax.plot(0.0, 0.0, 'ro')
   ax.set_ylabel('Z')
   ax.set_xlabel('Y')
