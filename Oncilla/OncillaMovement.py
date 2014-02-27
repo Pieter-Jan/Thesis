@@ -9,7 +9,21 @@ from matplotlib.patches import Polygon
 numpy.set_printoptions(precision=5)
 numpy.set_printoptions(suppress=True)
 
-def vector_intersection(v1,v2,d1,d2):
+def SameSide(p1,p2, a,b):
+    cp1 = numpy.cross(b-a, p1-a)
+    cp2 = numpy.cross(b-a, p2-a)
+    if numpy.dot(cp1, cp2) >= 0: 
+      return True
+    else: 
+      return False
+
+def PointInTriangle(p, a, b, c):
+    if SameSide(p,a, b,c) and SameSide(p,b, a,c) and SameSide(p,c, a,b): 
+        return True
+    else:
+      return False
+
+def VectorIntersection(v1,v2,d1,d2):
     '''
     v1 and v2 - Vector points
     d1 and d2 - Direction vectors
@@ -79,11 +93,10 @@ def Move_COB(oncilla, X_goal, q_init, q_ref, speed):
 
 def QuadShift(q_current, swingLeg):
   # Move the body to position the COG inside the upcoming support polygon
-  stabilityMargin = 2.0
+  stabilityMargin = 10.0
 
   feet = OK.RelativeFootPositions(q_current) 
   feet = numpy.delete(feet, 0, axis=0) # remove z-coordinates
-  print feet
 
   if swingLeg == 1 or swingLeg == 4:
     P1 = numpy.squeeze(numpy.asarray(feet[:, 1]))
@@ -98,14 +111,18 @@ def QuadShift(q_current, swingLeg):
   # Movement should be ortoghonal to trot line 
   move_dir = numpy.array([trot_dir[1], -trot_dir[0]])
 
-  COB_start = numpy.array([0.0, 0.0])
-  intersection = vector_intersection(P1, COB_start, trot_dir, move_dir)
-
+  X_start = numpy.array([0.0, 0.0])
   feet = numpy.delete(feet, swingLeg-1, axis=1)
-  fig, ax = plt.subplots()
-  ax.add_patch(Polygon(feet.T, closed=True, alpha=0.6))
-  ax.set_xlim([-200.0, 200.0])
-  ax.set_ylim([-100.0, 100.0])
-  ax.plot(intersection[0], intersection[1], 'ro')
-  ax.plot(0.0, 0.0, 'ko')
-  plt.show()
+  if not PointInTriangle(X_start, feet[:, 0].T, feet[:, 1].T, feet[:, 2].T):
+
+    intersection = VectorIntersection(P1, X_start, trot_dir, move_dir)
+
+    X_goal = intersection - stabilityMargin*move_dir
+
+    #fig, ax = plt.subplots()
+    #ax.add_patch(Polygon(feet.T, closed=True, alpha=0.6))
+    #ax.set_xlim([-200.0, 200.0])
+    #ax.set_ylim([-100.0, 100.0])
+    #ax.plot(X_goal[0], X_goal[1], 'ro')
+    #ax.plot(0.0, 0.0, 'ko')
+    #plt.show()
