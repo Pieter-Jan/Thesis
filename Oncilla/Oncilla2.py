@@ -12,7 +12,7 @@ import OncillaVisualization as OV
 import pygame
 from pygame.locals import *
 
-XDIM = 850
+XDIM = 900
 YDIM = 400
 WINSIZE = [XDIM, YDIM]
 

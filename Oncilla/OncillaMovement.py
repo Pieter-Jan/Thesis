@@ -51,15 +51,51 @@ def VectorIntersection(v1,v2,d1,d2):
           raise ValueError('Direction vectors are invalid.')
       return (v1[0] + lmbda* d1[0],v1[1] + lmbda * d1[1])
 
-def Move_Leg(oncilla):
-  # TODO
-  None
+def MaximumReachPoint(q_current, leg):
+  feet = OK.RelativeFootPositions(q_current) 
+  supportFeet = numpy.delete(feet, leg-1, axis=1)
+
+  # Determine plane through support feet
+  v1 = numpy.squeeze(numpy.asarray(supportFeet[:,1] - supportFeet[:,0]))
+  v2 = numpy.squeeze(numpy.asarray(supportFeet[:,2] - supportFeet[:,0]))
+  shoulder = numpy.array([[OK.Qs[leg-1]], [OK.Rs[leg-1]], [OK.Ss[leg-1]]])
+  v3 = numpy.squeeze(numpy.asarray(shoulder - supportFeet[:,0]))
+  
+  n = numpy.cross(v1, v2)
+  n = n/numpy.linalg.norm(n)
+
+  x = numpy.linalg.norm(numpy.dot(v3, n)*n)
+
+  max_y = math.sqrt(160.0**2 - x**2)  
+
+  X_MR = numpy.array([[x], [max_y], [0.0]]) + shoulder
+
+  return X_MR 
 
 def MoveToConfiguration(oncilla, q_start, q_goal):
   tree_a, tree_b, plan = RRT.RRT_Connect_Planner(q_start, q_goal, 1000, 0.01, None, OK.q_limits) 
   
   for q in plan:
     reply = oncilla.sendConfiguration(q)
+
+  return q
+
+def MoveLeg(oncilla, q_start, q_goal_leg, leg):
+  q_goal = list(q_start)
+  q_goal[3*(leg-1):3*(leg-1)+3] = numpy.squeeze(q_goal_leg)
+  
+  MaximumReachPoint(q_start, 1)
+
+  q = MoveToConfiguration(oncilla, q_start, q_goal)
+  
+  return q
+
+def SwingLeg(oncilla, q_current, leg):
+  X_MR = MaximumReachPoint(q_current, leg)
+  
+  q = OK.InverseKinematics_SL(q_current[3*(leg-1):3*(leg-1)+3], X_MR, leg)
+
+  MoveLeg(oncilla, q_current, q, leg)
 
 def Move_COB(oncilla, X_goal, q_init, q_ref, speed, swingLeg=1):
   # Move in a straigth line to X_goal
@@ -97,7 +133,7 @@ def Move_COB(oncilla, X_goal, q_init, q_ref, speed, swingLeg=1):
 
 def QuadShift(oncilla, q_current, swingLeg):
   # Move the body to position the COG inside the upcoming support polygon
-  stabilityMargin = 10.0
+  stabilityMargin = 20.0
 
   feet = OK.RelativeFootPositions(q_current) 
   feet = numpy.delete(feet, 0, axis=0) # remove z-coordinates
@@ -122,9 +158,14 @@ def QuadShift(oncilla, q_current, swingLeg):
     intersection = VectorIntersection(P1, X_start, trot_dir, move_dir)
 
     X_goal_2D = intersection - stabilityMargin*move_dir
-  
     X_goal_3D = numpy.matrix([[0.0], [X_goal_2D[0]], [X_goal_2D[1]]])
 
     q_goal = OK.InverseKinematics_COB_SL(q_current, X_goal_3D)
   
-    MoveToConfiguration(oncilla, q_current, q_goal)
+    q_current = MoveToConfiguration(oncilla, q_current, q_goal)
+
+  return q_current
+
+def SwingShift(oncilla, q_current, swingLeg):
+  # TODO
+  None

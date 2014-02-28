@@ -201,12 +201,18 @@ def Jacobian_RBj(X_B, q_a, j):
   
   return J_RBj
 
-def AngleLimits(q_a):
-  for leg in xrange(0,4):
-    for joint in xrange(0, 3):
-      q_a[3*leg + joint] = max(q_a[3*leg + joint], q_limits[0, 3*leg + joint])
-      q_a[3*leg + joint] = min(q_a[3*leg + joint], q_limits[1, 3*leg + joint])
+def AngleLimits_SL(q_SL, leg):
+  # q_SL: 1*3 matrix with alpha, beta, gamma of 1 leg
+  for joint in xrange(0, 3):
+    q_SL[joint] = max(q_SL[joint], q_limits[0, 3*leg + joint])
+    q_SL[joint] = min(q_SL[joint], q_limits[1, 3*leg + joint])
 
+  return q_SL
+
+def AngleLimits(q_a):
+  # q_a: 1*12 matrix with alpha, beta & gamma of all legs
+  for leg in xrange(0,4):
+    q_a[3*leg:3*leg+3] = AngleLimits_SL(q_a[3*leg:3*leg+3], leg)
   return q_a
 
 def Jacobian_SwingFoot(X_B, q_a, leg=1):
@@ -297,6 +303,32 @@ def Trilateration(P1, P2, P3, A, B, C):
                         [P3[0,0]**2 + P3[1,0]**2 + P3[2,0]**2 - C**2]])
 
   return numpy.linalg.pinv(G)*h
+
+def InverseKinematics_SL(q_init_leg, X_goal_leg, leg):
+  accuracy = 0.01
+  maxIter = 100
+
+  X_current = FootPositions_SL(q_init_leg[3*(leg-1)], q_init_leg[3*(leg-1)+1], 
+                         q_init_leg[leg-1+2], leg)
+  q_cur = q_init_leg
+
+  i = 0
+  distance = numpy.linalg.norm(X_goal_leg - X_current)
+  while distance > accuracy and i < maxIter:
+    J = Jacobian_SL(q_cur[0], q_cur[1], q_cur[2], leg)
+
+    dq = numpy.linalg.pinv(J)*(X_goal_leg - X_current)
+
+    q_cur = numpy.squeeze(numpy.asarray(q_cur + dq.T))
+    q_cur = AngleLimits_SL(q_cur, leg)
+  
+    X_current = FootPositions_SL(q_cur[0], q_cur[1], q_cur[2], leg) 
+
+    distance = numpy.linalg.norm(X_goal_leg - X_current)
+
+    i = i + 1
+
+  return q_cur
 
 def InverseKinematics_COB(q_init, X_G):
   P_start = RelativeFootPositions(q_init)
