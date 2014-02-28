@@ -13,6 +13,10 @@ from matplotlib.patches import Polygon
 numpy.set_printoptions(precision=5)
 numpy.set_printoptions(suppress=True)
 
+def QuadraticBezier(P0, P1, P2, t):
+  #return (1-2)**2*P0+2*(1-t)*t*P1+t**2*P2
+  return P0*(1-t)**2 + 2*P1*(1-t)*t + P2*t**2
+
 def SameSide(p1,p2, a,b):
   cp1 = numpy.cross(b-a, p1-a)
   cp2 = numpy.cross(b-a, p2-a)
@@ -65,10 +69,11 @@ def MaximumReachPoint(q_current, leg):
   n = n/numpy.linalg.norm(n)
 
   x = numpy.linalg.norm(numpy.dot(v3, n)*n)
+  z = feet[2, leg-1] - shoulder[2]
 
-  max_y = math.sqrt(160.0**2 - x**2)  
+  max_y = math.sqrt(160.0**2 - x**2 - z**2)  
 
-  X_MR = numpy.array([[x], [max_y], [0.0]]) + shoulder
+  X_MR = numpy.array([[x], [max_y], [z]]) + shoulder
 
   return X_MR 
 
@@ -91,11 +96,22 @@ def MoveLeg(oncilla, q_start, q_goal_leg, leg):
   return q
 
 def SwingLeg(oncilla, q_current, leg):
+  X_start = OK.RelativeFootPositions(q_current)
+
   X_MR = MaximumReachPoint(q_current, leg)
   
-  q = OK.InverseKinematics_SL(q_current[3*(leg-1):3*(leg-1)+3], X_MR, leg)
+  X_control = numpy.matrix([[X_start[0, leg-1]-60.0, X_start[1, leg-1]+(X_MR[1]-X_start[1, leg-1])/2.0, X_MR[2]]]).T
 
-  MoveLeg(oncilla, q_current, q, leg)
+  t = 0.0
+  step = 0.1
+  while t < 1.0:
+    X_next = numpy.matrix(QuadraticBezier(X_start[:,leg-1], X_control, X_MR, t))
+    
+    t = t + step
+    
+    q_goal = OK.InverseKinematics_SL(q_current[3*(leg-1):3*(leg-1)+3], X_next, leg)
+
+    q_current = MoveLeg(oncilla, q_current, q_goal, leg)
 
 def Move_COB(oncilla, X_goal, q_init, q_ref, speed, swingLeg=1):
   # Move in a straigth line to X_goal
@@ -133,7 +149,7 @@ def Move_COB(oncilla, X_goal, q_init, q_ref, speed, swingLeg=1):
 
 def QuadShift(oncilla, q_current, swingLeg):
   # Move the body to position the COG inside the upcoming support polygon
-  stabilityMargin = 20.0
+  stabilityMargin = 10.0
 
   feet = OK.RelativeFootPositions(q_current) 
   feet = numpy.delete(feet, 0, axis=0) # remove z-coordinates

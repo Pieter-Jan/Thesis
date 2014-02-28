@@ -310,6 +310,7 @@ def InverseKinematics_SL(q_init_leg, X_goal_leg, leg):
 
   X_current = FootPositions_SL(q_init_leg[3*(leg-1)], q_init_leg[3*(leg-1)+1], 
                          q_init_leg[leg-1+2], leg)
+  
   q_cur = q_init_leg
 
   i = 0
@@ -328,7 +329,11 @@ def InverseKinematics_SL(q_init_leg, X_goal_leg, leg):
 
     i = i + 1
 
-  return q_cur
+  if i <= maxIter:
+    return q_cur
+  else:
+    print 'Fail'
+    return None
 
 def InverseKinematics_COB(q_init, X_G):
   P_start = RelativeFootPositions(q_init)
@@ -352,7 +357,11 @@ def InverseKinematics_COB(q_init, X_G):
   
     i = i + 1
 
-  return qa
+  if i < maxIter:
+    return qa
+  else:
+    print 'Fail'
+    return None
 
 def InverseKinematics_COB_SL(q_init, X_G):
   # Inverse kinematics for COB based on single leg jacobians
@@ -360,8 +369,8 @@ def InverseKinematics_COB_SL(q_init, X_G):
   
   X_B_Current = numpy.matrix([[0.0, 0.0, 0.0]])
 
-  maxIter = 50
-  accuracy = 0.01
+  maxIter = 100
+  accuracy = 1.0
 
   qa = q_init 
 
@@ -392,9 +401,10 @@ def InverseKinematics_COB_SL(q_init, X_G):
 
     i += 1
 
-  if i <= maxIter:
+  if i < maxIter:
     return qa
   else:
+    print 'Fail'
     return None
 
 def Relative_COB(q_start, q_current, swingLeg=1):
