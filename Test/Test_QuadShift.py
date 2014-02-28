@@ -16,6 +16,7 @@ numpy.set_printoptions(precision=4)
 
 # Oncilla hardware object
 oh = Oncilla2.OncillaHardware(simulation=True)
+oh.showSupportPolygon = True
 
 alpha1 = alpha2 = 0.0*math.pi/180.0
 beta1 = beta2 = 135.0*math.pi/180.0
@@ -31,6 +32,7 @@ if oh is not None:
 
 raw_input("Press key to continue")
 
-speed = 20.0
+q = OM.QuadShift(oh, q_start, 1)
 
-q = OM.QuadShift(q_start, swingLeg=1)
+while True:
+  None

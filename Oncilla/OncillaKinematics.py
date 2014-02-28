@@ -303,7 +303,7 @@ def InverseKinematics_COB(q_init, X_G):
   X_B_Current = numpy.matrix([[0.0], [0.0], [0.0]])
 
   maxIter = 100
-  accuracy = 0.005
+  accuracy = 0.05
 
   i = 0
   qa = q_init

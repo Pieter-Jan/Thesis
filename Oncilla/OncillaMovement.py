@@ -1,7 +1,11 @@
+import sys
+sys.path.append('../Planning')
+
 import numpy
 import math
 import OncillaKinematics as OK
 import OncillaVisualization as OV
+import RRT 
 import Oncilla2
 import time
 import matplotlib.pyplot as plt
@@ -10,56 +14,60 @@ numpy.set_printoptions(precision=5)
 numpy.set_printoptions(suppress=True)
 
 def SameSide(p1,p2, a,b):
-    cp1 = numpy.cross(b-a, p1-a)
-    cp2 = numpy.cross(b-a, p2-a)
-    if numpy.dot(cp1, cp2) >= 0: 
-      return True
-    else: 
-      return False
+  cp1 = numpy.cross(b-a, p1-a)
+  cp2 = numpy.cross(b-a, p2-a)
+  if numpy.dot(cp1, cp2) >= 0: 
+    return True
+  else: 
+    return False
 
 def PointInTriangle(p, a, b, c):
-    if SameSide(p,a, b,c) and SameSide(p,b, a,c) and SameSide(p,c, a,b): 
-        return True
-    else:
-      return False
+  if SameSide(p,a, b,c) and SameSide(p,b, a,c) and SameSide(p,c, a,b): 
+      return True
+  else:
+    return False
 
 def VectorIntersection(v1,v2,d1,d2):
-    '''
-    v1 and v2 - Vector points
-    d1 and d2 - Direction vectors
-    returns the intersection point for the two vector line equations.
-    '''
-    if d1[0] == 0 and d2[0] != 0 or d1[1] == 0 and d2[1] != 0:
-        if d1[0] == 0 and d2[0] != 0:
-            mu = float(v1[0] - v2[0])/d2[0]
-        elif d1[1] == 0 and d2[1] != 0:
-            mu = float(v1[1] - v2[1])/d2[1]
-        return (v2[0] + mu* d2[0],v2[1] + mu * d2[1])
-    else:
-        if d1[0] != 0 and d1[1] != 0 and d2[0] != 0 and d2[1] != 0:
-            if d1[1]*d2[0] - d1[0]*d2[1] == 0:
-                raise ValueError('Direction vectors are invalid. (Parallel)')
-            lmbda = float(v1[0]*d2[1] - v1[1]*d2[0] - v2[0]*d2[1] + v2[1]*d2[0])/(d1[1]*d2[0] - d1[0]*d2[1])
-        elif d2[0] == 0 and d1[0] != 0:
-            lmbda = float(v2[0] - v1[0])/d1[0]
-        elif d2[1] == 0 and d1[1] != 0:
-            lmbda = float(v2[1] - v1[1])/d1[1]
-        else:
-            raise ValueError('Direction vectors are invalid.')
-        return (v1[0] + lmbda* d1[0],v1[1] + lmbda * d1[1])
+  # v1 and v2 - Vector points
+  # d1 and d2 - Direction vectors
+  # returns the intersection point for the two vector line equations.
+  if d1[0] == 0 and d2[0] != 0 or d1[1] == 0 and d2[1] != 0:
+      if d1[0] == 0 and d2[0] != 0:
+          mu = float(v1[0] - v2[0])/d2[0]
+      elif d1[1] == 0 and d2[1] != 0:
+          mu = float(v1[1] - v2[1])/d2[1]
+      return (v2[0] + mu* d2[0],v2[1] + mu * d2[1])
+  else:
+      if d1[0] != 0 and d1[1] != 0 and d2[0] != 0 and d2[1] != 0:
+          if d1[1]*d2[0] - d1[0]*d2[1] == 0:
+              raise ValueError('Direction vectors are invalid. (Parallel)')
+          lmbda = float(v1[0]*d2[1] - v1[1]*d2[0] - v2[0]*d2[1] + 
+                        v2[1]*d2[0])/(d1[1]*d2[0] - d1[0]*d2[1])
+      elif d2[0] == 0 and d1[0] != 0:
+          lmbda = float(v2[0] - v1[0])/d1[0]
+      elif d2[1] == 0 and d1[1] != 0:
+          lmbda = float(v2[1] - v1[1])/d1[1]
+      else:
+          raise ValueError('Direction vectors are invalid.')
+      return (v1[0] + lmbda* d1[0],v1[1] + lmbda * d1[1])
 
 def Move_Leg(oncilla):
   # TODO
   None
 
-def Move_COB(oncilla, X_goal, q_init, q_ref, speed):
+def MoveToConfiguration(oncilla, q_start, q_goal):
+  tree_a, tree_b, plan = RRT.RRT_Connect_Planner(q_start, q_goal, 1000, 0.01, None, OK.q_limits) 
+  
+  for q in plan:
+    reply = oncilla.sendConfiguration(q)
+
+def Move_COB(oncilla, X_goal, q_init, q_ref, speed, swingLeg=1):
   # Move in a straigth line to X_goal
   # X_goal: Goal position relative to current position
   # q_init: current configuration of robot
   # q_ref: reference configuration (X_B = 0, 0, 0)
 
-  swingLeg = 1 
-  accuracy = 0.5
+  accuracy = 1.0
 
   X_current = OK.Relative_COB(q_init, q_ref, swingLeg)
 
@@ -77,8 +85,6 @@ def Move_COB(oncilla, X_goal, q_init, q_ref, speed):
     q_current = OK.InverseKinematics_COB_SL(q_current, X_next)
     #q_current = OK.InverseKinematics_COB(q_current, X_next)
 
-    #print q_current * 180.0/math.pi
-
     if q_current is not None:
       reply = oncilla.sendConfiguration(q_current)
     else:
@@ -86,11 +92,10 @@ def Move_COB(oncilla, X_goal, q_init, q_ref, speed):
       return None
 
     X_current = OK.Relative_COB(q_ref, q_current, swingLeg) 
-    #print X_current.T
 
   return q_current
 
-def QuadShift(q_current, swingLeg):
+def QuadShift(oncilla, q_current, swingLeg):
   # Move the body to position the COG inside the upcoming support polygon
   stabilityMargin = 10.0
 
@@ -116,12 +121,10 @@ def QuadShift(q_current, swingLeg):
 
     intersection = VectorIntersection(P1, X_start, trot_dir, move_dir)
 
-    X_goal = intersection - stabilityMargin*move_dir
+    X_goal_2D = intersection - stabilityMargin*move_dir
+  
+    X_goal_3D = numpy.matrix([[0.0], [X_goal_2D[0]], [X_goal_2D[1]]])
 
-    #fig, ax = plt.subplots()
-    #ax.add_patch(Polygon(feet.T, closed=True, alpha=0.6))
-    #ax.set_xlim([-200.0, 200.0])
-    #ax.set_ylim([-100.0, 100.0])
-    #ax.plot(X_goal[0], X_goal[1], 'ro')
-    #ax.plot(0.0, 0.0, 'ko')
-    #plt.show()
+    q_goal = OK.InverseKinematics_COB_SL(q_current, X_goal_3D)
+  
+    MoveToConfiguration(oncilla, q_current, q_goal)

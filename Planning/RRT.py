@@ -7,7 +7,6 @@ FAILURE = -1
 REACHED = 1
 ADVANCED = 2
 TRAPPED = 3
-q_new_global = None
 footsize = 50
 
 def euclidian_distance(node1, node2):
@@ -48,9 +47,14 @@ class Node:
       self.tree.lastNode = self
   
 def CollisionFree(node, terrain):
-  if node.config.item(1) < terrain.item(min(node.config.item(0), 499)) and \
-     node.config.item(1) < terrain.item(min(node.config.item(0) + footsize/2.0, 499)) and \
-     node.config.item(1) < terrain.item(min(node.config.item(0) - footsize/2.0, 499)):
+  if terrain is not None:
+    if node.config.item(1) < terrain.item(min(node.config.item(0), 499)) and \
+       node.config.item(1) < terrain.item(min(node.config.item(0) + footsize/2.0, 499)) and \
+       node.config.item(1) < terrain.item(min(node.config.item(0) - footsize/2.0, 499)):
+      return True
+    else:
+      return False
+  else:
     return True
 
 # Normal RRT
@@ -93,7 +97,7 @@ def RRT_Connect_Planner(q_init, q_goal, numberOfNodes, delta_q, terrain, q_limit
 
   i = 1
   for k in range(1, numberOfNodes):
-    q_rand = q_limits[0,:] + (q_limits[1,:] - q_limits[0,:])*numpy.random.rand(len(q_limits))
+    q_rand = q_limits[0,:] + (q_limits[1,:] - q_limits[0,:])*numpy.random.rand(len(q_limits[0,:]))
     
     if(Extend(tree_1, q_rand, delta_q, terrain) is not TRAPPED):
       if(Connect(tree_2, q_new_global, delta_q, terrain) is REACHED):
@@ -131,7 +135,6 @@ def Path(tree_a, tree_b):
   path_raw = path_a + path_b
 
   return tree_a, tree_b, path_raw
-
 
   
   
