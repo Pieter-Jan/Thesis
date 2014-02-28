@@ -103,15 +103,21 @@ def SwingLeg(oncilla, q_current, leg):
   X_control = numpy.matrix([[X_start[0, leg-1]-60.0, X_start[1, leg-1]+(X_MR[1]-X_start[1, leg-1])/2.0, X_MR[2]]]).T
 
   t = 0.0
-  step = 0.1
+  step = 0.05
   while t < 1.0:
     X_next = numpy.matrix(QuadraticBezier(X_start[:,leg-1], X_control, X_MR, t))
     
     t = t + step
     
     q_goal = OK.InverseKinematics_SL(q_current[3*(leg-1):3*(leg-1)+3], X_next, leg)
+    q_current[3*(leg-1):3*(leg-1)+3] = q_goal
+    reply = oncilla.sendConfiguration(q_current)
 
-    q_current = MoveLeg(oncilla, q_current, q_goal, leg)
+    #q_current = MoveLeg(oncilla, q_current, q_goal, leg)
+  
+  SwingShift(oncilla, q_current, leg)
+
+  return q_current
 
 def Move_COB(oncilla, X_goal, q_init, q_ref, speed, swingLeg=1):
   # Move in a straigth line to X_goal
@@ -173,7 +179,7 @@ def QuadShift(oncilla, q_current, swingLeg):
 
     intersection = VectorIntersection(P1, X_start, trot_dir, move_dir)
 
-    X_goal_2D = intersection - stabilityMargin*move_dir
+    X_goal_2D = intersection# - stabilityMargin*move_dir
     X_goal_3D = numpy.matrix([[0.0], [X_goal_2D[0]], [X_goal_2D[1]]])
 
     q_goal = OK.InverseKinematics_COB_SL(q_current, X_goal_3D)
@@ -183,5 +189,8 @@ def QuadShift(oncilla, q_current, swingLeg):
   return q_current
 
 def SwingShift(oncilla, q_current, swingLeg):
-  # TODO
-  None
+  if leg == 3 or leg == 4:
+    None
+  elif leg == 1 or leg == 2:
+    None
+    

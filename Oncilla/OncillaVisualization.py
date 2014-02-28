@@ -48,9 +48,10 @@ def VisualizeRobot(oncilla, q, swingLeg=1, showSupportPolygon=False):
   conv = np.asarray([int(700 + y), int(200 + z)])
 
   if showSupportPolygon == True:
-    pointlist = [np.array([feet[1, 1], feet[2, 1]]) + conv, 
-                 np.array([feet[1, 2], feet[2, 2]]) + conv,  
-                 np.array([feet[1, 3], feet[2, 3]]) + conv]  
+    supportFeet = numpy.delete(feet, oncilla.swingLeg-1, axis=1)
+    pointlist = [np.array([supportFeet[1, 0], supportFeet[2, 0]]) + conv, 
+                 np.array([supportFeet[1, 1], supportFeet[2, 1]]) + conv,  
+                 np.array([supportFeet[1, 2], supportFeet[2, 2]]) + conv]  
 
     pygame.draw.polygon(oncilla.screen, green, pointlist, 1)
     pygame.draw.circle(oncilla.screen, green, conv, 2)

@@ -35,8 +35,15 @@ raw_input("Press key to continue")
 speed = 30.0
 X_goal = numpy.array([[10.0], [0.0], [0.0]])
 q = OM.Move_COB(oh, X_goal, q_start, q_start, speed, swingLeg=1) 
-q = OM.QuadShift(oh, q, 1)
-q = OM.SwingLeg(oh, q, 1)
+
+#for i in xrange(0, 10):
+#  for leg in xrange(1, 5):
+#    oh.swingLeg = leg
+leg = 4
+oh.swingLeg = leg
+q = OM.QuadShift(oh, q, leg)
+q = OM.SwingLeg(oh, q, leg)
+q = OM.SwingLeg(oh, q, leg)
 
 while True:
   None

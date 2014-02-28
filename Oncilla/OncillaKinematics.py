@@ -308,8 +308,7 @@ def InverseKinematics_SL(q_init_leg, X_goal_leg, leg):
   accuracy = 0.01
   maxIter = 100
 
-  X_current = FootPositions_SL(q_init_leg[3*(leg-1)], q_init_leg[3*(leg-1)+1], 
-                         q_init_leg[leg-1+2], leg)
+  X_current = FootPositions_SL(q_init_leg[0], q_init_leg[1], q_init_leg[2], leg)
   
   q_cur = q_init_leg
 
