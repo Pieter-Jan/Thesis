@@ -55,10 +55,10 @@ def CollisionFree(node, terrain):
 
 # Normal RRT
 # -------------------- 
-def Build_RRT(q_init, numberOfNodes, delta_q, terrain):
+def Build_RRT(q_init, numberOfNodes, delta_q, terrain, q_limits):
   tree = Tree(q_init)
   for k in range(1, numberOfNodes):
-    q_rand = numpy.array([numpy.random.randint(0, 500), numpy.random.randint(0, 500)])
+    q_rand = q_limits[0,:] + (q_limits[1,:] - q_limits[0,:])*numpy.random.rand(len(q_limits))
     Extend(tree, q_rand, delta_q, terrain)
 
   return tree
@@ -86,26 +86,22 @@ def Extend(tree, q_rand, delta_q, terrain):
 
 # RRT-Connect
 # --------------------
-def RRT_Connect_Planner(q_init, q_goal, numberOfNodes, delta_q, terrain):
-  tree_a = Tree(q_init)
-  tree_b = Tree(q_goal)
+def RRT_Connect_Planner(q_init, q_goal, numberOfNodes, delta_q, terrain, q_limits):
+  tree_a, tree_b = Tree(q_init), Tree(q_goal)
 
-  tree_1 = tree_a
-  tree_2 = tree_b
+  tree_1, tree_2 = tree_a, tree_b
 
   i = 1
   for k in range(1, numberOfNodes):
-    q_rand = numpy.array([numpy.random.randint(0, 500), numpy.random.randint(0, 500)])
+    q_rand = q_limits[0,:] + (q_limits[1,:] - q_limits[0,:])*numpy.random.rand(len(q_limits))
     
     if(Extend(tree_1, q_rand, delta_q, terrain) is not TRAPPED):
       if(Connect(tree_2, q_new_global, delta_q, terrain) is REACHED):
         return Path(tree_1, tree_2)
       if i == 1:
-        tree_1 = tree_b
-        tree_2 = tree_a
+        tree_1, tree_2 = tree_b, tree_a
       else:
-        tree_1 = tree_a
-        tree_2 = tree_b
+        tree_1, tree_2 = tree_a, tree_b
     i *= -1
   
   return tree_a, tree_b, FAILURE

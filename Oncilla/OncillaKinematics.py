@@ -3,29 +3,26 @@ import numpy
 import math
 import matplotlib.pyplot as plt
 from matplotlib.patches import Polygon
-from scipy.optimize import fsolve
 
 # Leg parameters
 As = [60.0, 60.0, 78.0, 78.0]
 Bs = [56.0, 56.0, 65.0, 65.0]
 Cs = [62.5, 62.0, 52.0, 52.0]
 
-# Position of legs within robot
-d1 = 227.0
-d2 = 137.5
+# Position of legs within robot (hip coordinates)
 Qs = [0.0, 0.0, 0.0, 0.0]
-Rs = [d1/2.0, d1/2.0, -d1/2.0, -d1/2.0]
-Ss = [-d2/2.0, d2/2.0, -d2/2.0, d2/2.0]
+Rs = [227.0/2.0, 227.0/2.0, -227.0/2.0, -227.0/2.0]
+Ss = [-137.5/2.0, 137.5/2.0, -137.5/2.0, 137.5/2.0]
 
-# Angle limits
-alpha_min = [-43./180.*math.pi, -43./180.*math.pi, -43./180.*math.pi, -43./180.*math.pi]
-alpha_max = [62./180.*math.pi, 62./180.*math.pi, 58./180.*math.pi, 58./180.*math.pi]
-
-beta_min= [85./180.*math.pi, 85./180.*math.pi, 78./180.*math.pi, 78./180.*math.pi]
-beta_max = [135./180.*math.pi, 135./180.*math.pi, 135./180.*math.pi, 135./180.*math.pi]
-
-gamma_min = [(90-8.98)/180.*math.pi,(90-8.98)/180.*math.pi,(90-6.38)/180.*math.pi,(90-6.38)/180.*math.pi]  
-gamma_max = [(90+8.08)/180.*math.pi,(90+8.08)/180.*math.pi,(90+10.40)/180.*math.pi,(90+10.40)/180.*math.pi] 
+# Configuration Joint Angle limits
+q_limits = math.pi/180.0*numpy.array([[-43., 85., 81.02, 
+                                       -43., 85., 81.02, 
+                                       -43., 78., 83.62, 
+                                       -43., 78., 83.62],
+                                      [62., 135., 98.08, 
+                                       62., 135., 98.08, 
+                                       58., 135., 100.40,  
+                                       58., 135., 100.40]])
 
 # Denavit Hartenberg Transformation Matrix
 def DH_BODY(Q, R, S, flip):
@@ -206,15 +203,10 @@ def Jacobian_RBj(X_B, q_a, j):
 
 def AngleLimits(q_a):
   for leg in xrange(0,4):
-    q_a[3*leg] = min(q_a[3*leg], alpha_max[leg])
-    q_a[3*leg] = max(q_a[3*leg], alpha_min[leg])
+    for joint in xrange(0, 3):
+      q_a[3*leg + joint] = max(q_a[3*leg + joint], q_limits[0, 3*leg + joint])
+      q_a[3*leg + joint] = min(q_a[3*leg + joint], q_limits[1, 3*leg + joint])
 
-    q_a[3*leg+1] = min(q_a[3*leg+1], beta_max[leg])
-    q_a[3*leg+1] = max(q_a[3*leg+1], beta_min[leg])
-
-    q_a[3*leg+2] = min(q_a[3*leg+2], gamma_max[leg])
-    q_a[3*leg+2] = max(q_a[3*leg+2], gamma_min[leg])
-  
   return q_a
 
 def Jacobian_SwingFoot(X_B, q_a, leg=1):
@@ -333,11 +325,11 @@ def InverseKinematics_COB(q_init, X_G):
 def InverseKinematics_COB_SL(q_init, X_G):
   # Inverse kinematics for COB based on single leg jacobians
   # gives configuration q to move to goal state X_G relative to current state
-
+  
   X_B_Current = numpy.matrix([[0.0, 0.0, 0.0]])
 
   maxIter = 50
-  accuracy = 0.05
+  accuracy = 0.01
 
   qa = q_init 
 

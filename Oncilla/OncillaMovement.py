@@ -59,7 +59,7 @@ def Move_COB(oncilla, X_goal, q_init, q_ref, speed):
   # q_ref: reference configuration (X_B = 0, 0, 0)
 
   swingLeg = 1 
-  accuracy = 1.0
+  accuracy = 0.5
 
   X_current = OK.Relative_COB(q_init, q_ref, swingLeg)
 
@@ -69,9 +69,8 @@ def Move_COB(oncilla, X_goal, q_init, q_ref, speed):
 
   while numpy.linalg.norm(X_goal - X_current) > accuracy:
     X_next = X_goal - X_current
-    norm = numpy.linalg.norm(X_goal - X_current) 
-    #if norm > 10.0*accuracy:
-    X_next = X_next/norm * (speed*(time.time() - startTime))
+    norm = numpy.linalg.norm(X_next) 
+    X_next = X_next/norm*min(norm, speed*(time.time() - startTime))
     
     startTime = time.time()
 

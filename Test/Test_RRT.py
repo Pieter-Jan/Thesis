@@ -1,5 +1,6 @@
 import sys
 sys.path.append('../Planning')
+sys.path.append('../Oncilla')
 
 import pygame
 from pygame.locals import *
@@ -8,6 +9,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import RRT
 import numpy
+import OncillaKinematics as OK
 
 numberOfNodes = 1000
 delta_q = 1.0*10
@@ -40,7 +42,8 @@ plt.plot(range(0, 500), terrain, color='r', linestyle='-', linewidth=2)
 plt.fill_between(range(0, 500), terrain, 500, color='none', hatch="/", edgecolor='r')
 plt.draw()
 
-tree_a, tree_b, path = RRT.RRT_Connect_Planner(numpy.array([10.0, 400.0]), numpy.array([240.0, 400.0]), numberOfNodes, delta_q, terrain)
+q_limits = numpy.array([[0.0, 0.0],[500.0, 500.0]])
+tree_a, tree_b, path = RRT.RRT_Connect_Planner(numpy.array([10.0, 400.0]), numpy.array([240.0, 400.0]), numberOfNodes, delta_q, terrain, q_limits)
 
 VisualizeTree(tree_a.root, 'k') 
 VisualizeTree(tree_b.root, 'b') 

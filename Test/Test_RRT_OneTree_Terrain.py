@@ -21,7 +21,6 @@ blue = 0, 0, 255
 green = 0, 255, 0
 black = 0, 0, 0
 
-
 def VisualizeTree(startNode, color):
   if startNode.parent is not None:
     #pygame.draw.line(screen, color, startNode.config, startNode.parent.config)
@@ -34,14 +33,15 @@ def VisualizeTree(startNode, color):
   for child in startNode.children:
     VisualizeTree(child, color)
 
-
 terrain = numpy.ones(500)*(400) 
 terrain[100:220] = numpy.ones(120)*(300) 
 terrain[280:320] = numpy.ones(40)*(300) 
 plt.fill_between(range(0, 500), terrain, 500, color='none', hatch="/", edgecolor='r')
 plt.draw()
 
-tree = RRT.Build_RRT(numpy.array([250.0, 250.0]), numberOfNodes, delta_q, terrain)
+q_limits = numpy.array([[0.0, 0.0],[500.0, 500.0]])
+
+tree = RRT.Build_RRT(numpy.array([250.0, 250.0]), numberOfNodes, delta_q, terrain, q_limits)
 VisualizeTree(tree.root, 'b')
 
 plt.gca().set_xticks(numpy.arange(0,500.,50))
