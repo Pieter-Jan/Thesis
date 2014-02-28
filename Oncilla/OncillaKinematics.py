@@ -204,15 +204,15 @@ def Jacobian_RBj(X_B, q_a, j):
 def AngleLimits_SL(q_SL, leg):
   # q_SL: 1*3 matrix with alpha, beta, gamma of 1 leg
   for joint in xrange(0, 3):
-    q_SL[joint] = max(q_SL[joint], q_limits[0, 3*leg + joint])
-    q_SL[joint] = min(q_SL[joint], q_limits[1, 3*leg + joint])
+    q_SL[joint] = max(q_SL[joint], q_limits[0, 3*(leg-1) + joint])
+    q_SL[joint] = min(q_SL[joint], q_limits[1, 3*(leg-1) + joint])
 
   return q_SL
 
 def AngleLimits(q_a):
   # q_a: 1*12 matrix with alpha, beta & gamma of all legs
-  for leg in xrange(0,4):
-    q_a[3*leg:3*leg+3] = AngleLimits_SL(q_a[3*leg:3*leg+3], leg)
+  for leg in xrange(1,5):
+    q_a[3*(leg-1):3*(leg-1)+3] = AngleLimits_SL(q_a[3*(leg-1):3*(leg-1)+3], leg)
   return q_a
 
 def Jacobian_SwingFoot(X_B, q_a, leg=1):
