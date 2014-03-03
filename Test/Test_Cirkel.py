@@ -16,15 +16,10 @@ numpy.set_printoptions(precision=4)
 oh = Oncilla2.OncillaHardware(True)
 oh.showSupportPolygon = True
 
-alpha1 = alpha2 = 15.0*math.pi/180.0
-beta1 = beta2 = 135.0*math.pi/180.0
-gamma1 = gamma2 = 90.0*math.pi/180.0
-
-alpha3 = alpha4 = 25.0*math.pi/180.0
-beta3 = beta4 = 115.0*math.pi/180.0
-gamma3 = gamma4 = 90.0*math.pi/180.0
-
-q_start = numpy.array([alpha1, beta1, gamma1, alpha2, beta2, gamma2, alpha3, beta3, gamma3, alpha4, beta4, gamma4])
+q_start = numpy.array([0.0, 135.0, 90.0, 
+                       0.0, 135.0, 90.0, 
+                       0.0, 135.0, 90.0, 
+                       0.0, 135.0, 90.0])*math.pi/180.0
 
 if oh is not None:
   reply = oh.sendConfiguration(q_start)

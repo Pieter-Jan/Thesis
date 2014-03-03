@@ -18,7 +18,11 @@ alpha1 = alpha2 = alpha3 = alpha4 = 0.0*math.pi/180.0
 beta1 = beta2 = beta3 = beta4 = 135.0*math.pi/180.0
 gamma1 = gamma2 = gamma3 = gamma4 = 90.0*math.pi/180.0
 
-q_start = numpy.array([alpha1, beta1, gamma1, alpha2, beta2, gamma2, alpha3, beta3, gamma3, alpha4, beta4, gamma4])
+q_start = numpy.array([alpha1, beta1, gamma1, 
+                       alpha2, beta2, gamma2, 
+                       alpha3, beta3, gamma3, 
+                       alpha4, beta4, gamma4])
+
 reply = oh.sendConfiguration(q_start)
 
 raw_input("Press key to continue")
