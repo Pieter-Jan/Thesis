@@ -10,6 +10,7 @@ import marshal
 import matplotlib.pyplot as plt
 import OncillaVisualization as OV
 import pygame
+import numpy
 from pygame.locals import *
 
 XDIM = 900
@@ -32,6 +33,10 @@ class OncillaHardware:
     screen = None
     showSupportPolygon = False
     swingLeg = 1
+    q_ref = numpy.array([0.0, 135.0, 90.0, 
+                         0.0, 135.0, 90.0, 
+                         0.0, 135.0, 90.0, 
+                         0.0, 135.0, 90.0])*math.pi/180.0
  
     """ This connects to a robot-server, found on IP:PORT
      The robot's position will start on the position corresponding to the command {1:[0,135,0],2:[0,135,0],3:[0,135,0],4:[0,135,0]}"""
@@ -75,7 +80,7 @@ class OncillaHardware:
         return data
 
       else:
-        OV.VisualizeRobot(self, q, swingLeg = self.swingLeg, showSupportPolygon=self.showSupportPolygon)
+        OV.VisualizeRobot(self, q, showSupportPolygon=self.showSupportPolygon)
 
     def getConfiguration(self):
       # Get q

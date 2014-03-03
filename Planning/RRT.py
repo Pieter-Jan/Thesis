@@ -21,6 +21,7 @@ class Tree:
 
   def nearestNode(self, startNode, node):
     dist = euclidian_distance(startNode, node)
+
     if dist < self.mindist:
       self.mindist = dist
       self.near = startNode

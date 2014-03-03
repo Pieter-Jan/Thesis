@@ -15,19 +15,13 @@ blue = 0, 0, 255
 red = 255, 0, 0 
 black = 0, 0, 0
 
-def VisualizeRobot(oncilla, q, swingLeg=1, showSupportPolygon=False):
+def VisualizeRobot(oncilla, q, showSupportPolygon=False):
   feet = OK.RelativeFootPositions(q) 
   knees = OK.RelativeKneePositions(q) 
 
   oncilla.screen.fill(black)
 
-  alpha1 = alpha2 = alpha3 = alpha4 = 0.0*math.pi/180.0
-  beta1 = beta2 = beta3 = beta4 = 135.0*math.pi/180.0
-  gamma1 = gamma2 = gamma3 = gamma4 = 90.0*math.pi/180.0
-  
-  q_start = numpy.array([alpha1, beta1, gamma1, alpha2, beta2, gamma2, alpha3, beta3, gamma3, alpha4, beta4, gamma4])
-
-  x, y, z = OK.Relative_COB(q_start, q, 1)
+  x, y, z = OK.Relative_COB(oncilla.q_ref, q, oncilla.swingLeg)
   
   titleFont = pygame.font.SysFont("Lucida Sans Unicode", 30, bold=True)
   label = titleFont.render("Oncilla Visualizer", 1, (255,255,255))

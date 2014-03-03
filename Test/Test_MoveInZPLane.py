@@ -26,7 +26,11 @@ alpha3 = alpha4 = 10.0*math.pi/180.0
 beta3 = beta4 = 135.0*math.pi/180.0
 gamma3 = gamma4 = 95.0*math.pi/180.0
 
-q_start = numpy.array([alpha1, beta1, gamma1, alpha2, beta2, gamma2, alpha3, beta3, gamma3, alpha4, beta4, gamma4])
+q_start = numpy.array([alpha1, beta1, gamma1, 
+                       alpha2, beta2, gamma2, 
+                       alpha3, beta3, gamma3, 
+                       alpha4, beta4, gamma4])
+
 if oh is not None:
   reply = oh.sendConfiguration(q_start)
 

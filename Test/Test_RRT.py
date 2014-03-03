@@ -43,7 +43,10 @@ plt.fill_between(range(0, 500), terrain, 500, color='none', hatch="/", edgecolor
 plt.draw()
 
 q_limits = numpy.array([[0.0, 0.0],[500.0, 500.0]])
-tree_a, tree_b, path = RRT.RRT_Connect_Planner(numpy.array([10.0, 400.0]), numpy.array([240.0, 400.0]), numberOfNodes, delta_q, terrain, q_limits)
+tree_a, tree_b, path = RRT.RRT_Connect_Planner(numpy.array([10.0, 400.0]), 
+                                               numpy.array([240.0, 400.0]), 
+                                               numberOfNodes, delta_q, terrain, 
+                                               q_limits)
 
 VisualizeTree(tree_a.root, 'k') 
 VisualizeTree(tree_b.root, 'b') 

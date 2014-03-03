@@ -155,14 +155,13 @@ def Jacobian_LegLengths(q_a):
                              numpy.hstack([numpy.zeros(shape=(3,9)), J_leg4])])
   return dPl_on_dqa
 
-def Jacobian_COB(X_B, q_a):
+def Jacobian_COB(X_B, q_a, swingLeg):
   # X_B is the center of body in the global system
   X_B_4 = numpy.hstack([X_B, X_B, X_B, X_B]) 
 
   P_L = RelativeFootPositions(q_a)
 
-  # Get the current rotation of the body from the position of feet 2 - 4
-  R_B = RotationMatrix(P_L[:,1].T, P_L[:,3].T, P_L[:,2].T)
+  R_B = GetRotationMatrix(q_a, swingLeg)
 
   # Position of 4 feet in global system
   P_G = X_B_4 + R_B*P_L
@@ -219,7 +218,7 @@ def Jacobian_SwingFoot(X_B, q_a, leg=1):
   # Swing Foot Jacobian
   P_L = RelativeFootPositions(q_a)
 
-  R_B = RotationMatrix(P_L[:,1].T, P_L[:,3].T, P_L[:,2].T)
+  R_B = GetRotationMatrix(q_a, leg)
   
   Xsw_L = P_L[:, leg-1]
 
@@ -261,6 +260,20 @@ def RotationMatrix(P1, P2, P3):
     n2 = n2/numpy.linalg.norm(n2)
 
   return RodriguesRotation(n2, n1)
+
+def GetRotationMatrix(q_a, leg):
+  P_L = RelativeFootPositions(q_a)
+
+  if leg == 1:
+    R_B = RotationMatrix(P_L[:,1].T, P_L[:,3].T, P_L[:,2].T)
+  elif leg == 2:
+    R_B = RotationMatrix(P_L[:,3].T, P_L[:,2].T, P_L[:,0].T)
+  elif leg == 3:
+    R_B = RotationMatrix(P_L[:,0].T, P_L[:,1].T, P_L[:,3].T)
+  elif leg == 4:
+    R_B = RotationMatrix(P_L[:,2].T, P_L[:,0].T, P_L[:,1].T)
+
+  return R_B
 
 def RodriguesRotation(n1, n2):
 
@@ -334,7 +347,7 @@ def InverseKinematics_SL(q_init_leg, X_goal_leg, leg):
     print 'Fail'
     return None
 
-def InverseKinematics_COB(q_init, X_G):
+def InverseKinematics_COB(q_init, X_G, swingLeg):
   P_start = RelativeFootPositions(q_init)
   X_B_Current = numpy.matrix([[0.0], [0.0], [0.0]])
 
@@ -344,7 +357,7 @@ def InverseKinematics_COB(q_init, X_G):
   i = 0
   qa = q_init
   while numpy.linalg.norm(X_G - X_B_Current) > accuracy and i < maxIter:
-    J = Jacobian_COB(X_B_Current, qa);
+    J = Jacobian_COB(X_B_Current, qa, swingLeg);
 
     dq = numpy.squeeze(numpy.asarray(numpy.linalg.pinv(J)*(X_G - X_B_Current)))
 
@@ -352,7 +365,7 @@ def InverseKinematics_COB(q_init, X_G):
   
     qa = AngleLimits(qa)
     
-    X_B_Current = Relative_COB(q_init, qa, 1) 
+    X_B_Current = Relative_COB(q_init, qa, swingLeg) 
   
     i = i + 1
 
@@ -362,7 +375,7 @@ def InverseKinematics_COB(q_init, X_G):
     print 'Fail'
     return None
 
-def InverseKinematics_COB_SL(q_init, X_G):
+def InverseKinematics_COB_SL(q_init, X_G, swingLeg):
   # Inverse kinematics for COB based on single leg jacobians
   # gives configuration q to move to goal state X_G relative to current state
   
@@ -377,8 +390,7 @@ def InverseKinematics_COB_SL(q_init, X_G):
   while numpy.linalg.norm(X_G - X_B_Current) > accuracy and i < maxIter:
     X_dot = X_G - X_B_Current
   
-    PL = RelativeFootPositions(qa)
-    R_B = RotationMatrix(PL[:,1].T, PL[:,3].T, PL[:,2].T)
+    R_B = GetRotationMatrix(qa, swingLeg)
 
     P_L_dot = R_B.T*(-X_dot)
   
@@ -392,21 +404,23 @@ def InverseKinematics_COB_SL(q_init, X_G):
     qa3 = numpy.linalg.pinv(J_leg3)*P_L_dot
     qa4 = numpy.linalg.pinv(J_leg4)*P_L_dot
 
-    qa = qa + numpy.hstack([qa1.T.tolist()[0], qa2.T.tolist()[0], qa3.T.tolist()[0], qa4.T.tolist()[0]])
+    qa = qa + numpy.hstack([qa1.T.tolist()[0], 
+                            qa2.T.tolist()[0],  
+                            qa3.T.tolist()[0], 
+                            qa4.T.tolist()[0]])
 
     qa = AngleLimits(qa)
 
-    X_B_Current = Relative_COB(q_init, qa, 1) 
+    X_B_Current = Relative_COB(q_init, qa, swingLeg) 
 
     i += 1
+     
+  if i >= maxIter:
+    print 'InverseKinematics_COB_SL failed'
 
-  if i < maxIter:
-    return qa
-  else:
-    print 'Fail'
-    return None
+  return qa
 
-def Relative_COB(q_start, q_current, swingLeg=1):
+def Relative_COB(q_start, q_current, swingLeg):
   # Calculates the position 
   # swingLeg: leg that is not on the ground
 
@@ -422,34 +436,3 @@ def Relative_COB(q_start, q_current, swingLeg=1):
 
   return Trilateration(P_start[:,0], P_start[:,1], P_start[:,2], A, B, C)
 
-def SupportPolygon_Centroid(q_current, swingLeg=1):
-  feet = RelativeFootPositions(q_current)
-  feet = numpy.delete(feet, 0, axis=0)
-  feet = numpy.delete(feet, swingLeg-1, axis=1)
-
-  # Centroid of support triangle
-  yc = numpy.sum(feet[0,:])*1.0/3.0
-  zc = numpy.sum(feet[1,:])*1.0/3.0
-  
-  return yc, zc
-
-# VISUALISATION FUNCTIONS
-def Visualize_SupportPolygon(q_start, swingLeg=1):
-
-  feet = RelativeFootPositions(q_start)
-  fig, ax = plt.subplots()
-  feet = numpy.delete(feet, 0, axis=0)
-  feet = numpy.delete(feet, swingLeg-1, axis=1)
-
-  # Centroid of support triangle
-  yc, zc = SupportPolygon_Centroid(q_start, swingLeg)
-  ax.plot(yc, zc, 'go')
-
-  ax.add_patch(Polygon(feet.T, closed=True, alpha=0.6))
-  ax.set_xlim([-200.0, 200.0])
-  ax.set_ylim([-100.0, 100.0])
-  ax.plot(0.0, 0.0, 'ro')
-  ax.set_ylabel('Z')
-  ax.set_xlabel('Y')
-
-  plt.show()

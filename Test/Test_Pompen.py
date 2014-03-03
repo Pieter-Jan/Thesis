@@ -36,7 +36,7 @@ speed = 20.0
 q = q_start
 for i in range(0, 10):
   X_goal = numpy.matrix([[0.0],[0.0],[0.0]])
-  q = OM.Move_COB(oh, X_goal, q, q_start, speed)
+  q = OM.Move_COB(oh, X_goal, q, q_start, speed, 1)
 
   X_goal = numpy.matrix([[30.0],[0.0],[0.0]])
-  q = OM.Move_COB(oh, X_goal, q, q_start, speed)
+  q = OM.Move_COB(oh, X_goal, q, q_start, speed, 1)
