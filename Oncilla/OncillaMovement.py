@@ -93,7 +93,11 @@ def MaximumReachPoint(q_current, leg):
   arg = maxLegLength**2 - x**2 - z**2
   
   if arg > 0:
+<<<<<<< HEAD
     y = math.sqrt(arg)*2.0/4.0 
+=======
+    y = math.sqrt(arg)  
+>>>>>>> 0d48dcfe152578e2c38f5798d13b62f4530b78c7
   else:
     y = -1.0*float("inf")
 
@@ -157,7 +161,11 @@ def Move_COB(oncilla, X_goal, q_init, q_ref, speed, swingLeg):
     startTime = time.time()
 
     q_current = OK.InverseKinematics_COB_SL(q_current, X_next, swingLeg)
+<<<<<<< HEAD
     #q_current = OK.InverseKinematics_COB(q_current, X_next, swingLeg)
+=======
+    #q_current = OK.InverseKinematics_COB(q_current, X_next)
+>>>>>>> 0d48dcfe152578e2c38f5798d13b62f4530b78c7
 
     if q_current is not None:
       reply = oncilla.sendConfiguration(q_current)
@@ -169,6 +177,7 @@ def Move_COB(oncilla, X_goal, q_init, q_ref, speed, swingLeg):
 
   return q_current
 
+<<<<<<< HEAD
 def ReducedSupportPolygon(q, margin, swingLeg):
   # Returnes the three points of the support polygon reduced by a certain margin
 
@@ -191,6 +200,8 @@ def ReducedSupportPolygon(q, margin, swingLeg):
 
   return P1_acc, P2_acc, P3_acc
 
+=======
+>>>>>>> 0d48dcfe152578e2c38f5798d13b62f4530b78c7
 def GaitSelection(q_current, u, prevLeg):
   feet = OK.RelativeFootPositions(q_current) 
   legs = [1, 1, 1, 1]
@@ -230,6 +241,8 @@ def QuadShift(oncilla, q_current, swingLeg):
 
   # Movement should be ortoghonal to trot line 
   move_dir = numpy.array([trot_dir[1], -trot_dir[0]])
+  if swingLeg == 3 or swingLeg == 4:
+    move_dir = -1.0*move_dir
 
   X_start = numpy.array([0.0, 0.0])
   if not PointInTriangle(X_start, P1, P2, P3):
@@ -251,6 +264,7 @@ def SwingShift(oncilla, q_current, leg):
     X_goal_2D = CenterOfLineSegment(P1, P2)
     X_goal_3D = numpy.matrix([[0.0], [X_goal_2D[0]], [X_goal_2D[1]]])
 
+<<<<<<< HEAD
   elif leg == 2:
     P1 = numpy.squeeze(numpy.asarray(feet[:, 0]))
     P2 = numpy.squeeze(numpy.asarray(feet[:, 3]))
@@ -266,6 +280,14 @@ def SwingShift(oncilla, q_current, leg):
   X_goal = numpy.resize(X_goal_3D, (3,1))
   q_goal = OK.InverseKinematics_COB_SL(q_current, X_goal, leg)
   q_current = MoveToConfiguration(oncilla, q_current, q_goal)
+=======
+    X_goal_2D = intersection + stabilityMargin*move_dir
+    X_goal_3D = numpy.matrix([[0.0], [X_goal_2D[0]], [X_goal_2D[1]]])
+
+    q_goal = OK.InverseKinematics_COB_SL(q_current, X_goal_3D, swingLeg)
+  
+    q_current = MoveToConfiguration(oncilla, q_current, q_goal)
+>>>>>>> 0d48dcfe152578e2c38f5798d13b62f4530b78c7
 
   return q_current
   
@@ -273,12 +295,50 @@ def StaticGait(oncilla, q_current, u):
   leg = 0     
   q = q_current
 
+<<<<<<< HEAD
   for i in xrange(0, 16):
+=======
+def SwingShift(oncilla, q_current, leg):
+  feet = OK.RelativeFootPositions(q_current) 
+  feet = numpy.delete(feet, 0, axis=0) # remove z-coordinates
+
+  if leg == 1:
+    P1 = numpy.squeeze(numpy.asarray(feet[:, 1]))
+    P2 = numpy.squeeze(numpy.asarray(feet[:, 2]))
+    X_goal_2D = CenterOfLineSegment(P1, P2)
+    X_goal_3D = numpy.matrix([[0.0], [X_goal_2D[0]], [X_goal_2D[1]]])
+
+  elif leg == 2:
+    P1 = numpy.squeeze(numpy.asarray(feet[:, 0]))
+    P2 = numpy.squeeze(numpy.asarray(feet[:, 3]))
+    X_goal_2D = CenterOfLineSegment(P1, P2)
+    X_goal_3D = numpy.matrix([[0.0], [X_goal_2D[0]], [X_goal_2D[1]]])
+
+  elif leg == 3 or leg == 4:
+    X_goal_2D = SupportPolygonCentroid(q_current, leg) 
+    X_goal_3D = numpy.matrix([[0.0], [X_goal_2D[0]/2.0], [X_goal_2D[1]/2.0]])
+
+  X_goal = numpy.resize(X_goal_3D, (3,1))
+  q_goal = OK.InverseKinematics_COB_SL(q_current, X_goal, leg)
+  q_current = MoveToConfiguration(oncilla, q_current, q_goal)
+
+  return q_current
+  
+def StaticGait(oncilla, q_current, u):
+  leg = 0     
+  q = q_current
+
+  for i in xrange(0,16):
+>>>>>>> 0d48dcfe152578e2c38f5798d13b62f4530b78c7
     leg = GaitSelection(q, u, leg)
     oncilla.swingLeg = leg
     q = QuadShift(oncilla, q, leg)
     q = SwingLeg(oncilla, q, leg)
+<<<<<<< HEAD
     #q = SwingShift(oncilla, q, leg)
+=======
+    q = SwingShift(oncilla, q, leg)
+>>>>>>> 0d48dcfe152578e2c38f5798d13b62f4530b78c7
 
 
 

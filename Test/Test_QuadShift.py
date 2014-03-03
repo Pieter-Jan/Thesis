@@ -35,11 +35,18 @@ if oh is not None:
 raw_input("Press key to continue")
 
 speed = 30.0
+<<<<<<< HEAD
 leg = 2
 X_goal = numpy.array([[20.0], [0.0], [0.0]])
 oh.swingLeg = leg
 q = OM.Move_COB(oh, X_goal, q_start, q_start, speed, leg) 
 q = OM.QuadShift(oh, q, leg)
+=======
+X_goal = numpy.array([[10.0], [0.0], [0.0]])
+q = OM.Move_COB(oh, X_goal, q_start, q_start, speed, swingLeg=1) 
+
+q = OM.QuadShift(oh, q, 1)
+>>>>>>> 0d48dcfe152578e2c38f5798d13b62f4530b78c7
 
 while True:
   None
