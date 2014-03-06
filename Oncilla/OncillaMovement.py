@@ -73,9 +73,9 @@ def SupportPolygonCentroid(q_current, swingLeg=1):
 
 def MaxLegLength(leg):
   if leg == 1 or leg == 2:
-    return 150.0
+    return 160.0
   elif leg == 3 or leg == 4:
-    return 165.0
+    return 175.0
 
 def MaximumReachPoint(q_current, leg):
   maxLegLength = MaxLegLength(leg)
@@ -122,26 +122,38 @@ def SwingLeg(oncilla, q_current, leg):
   print 'X_MR after shift: \t', X_MR
   X_MR = numpy.matrix(X_MR.reshape(3,1))
 
+  q_leg = q_current[3*(leg-1):3*(leg-1)+3]
+  q_goal = OK.InverseKinematics_SL(q_leg, X_MR, leg)
+
+  control_y = X_start[1, leg-1]# + abs(X_MR[1] - X_start[1, leg-1])/2.0 
   X_control = numpy.matrix([[X_start[0, leg-1]-20.0, 
-                             X_start[1, leg-1]+(X_MR[1]-X_start[1, leg-1])/2.0
-                             ]]).T
-  t = 0.0
-  step = 0.01
-  while t < 1.0:
-    X_next_2D = numpy.squeeze(numpy.asarray(QuadraticBezier(X_start[0:2,leg-1], X_control,
-      X_MR[0:2], t)))
+                               control_y
+                               ]]).T
 
-    X_next = numpy.matrix([[X_next_2D[0], X_next_2D[1], X_MR[2,0]]]).T
+  if q_goal is not None:
+
+    # q_current[3*(leg-1):3*(leg-1)+3] = q_goal
+    # reply = oncilla.sendConfiguration(q_current)
+
+    t = 0.0
+    step = 0.01
+    while t < 1.0:
+      X_next_2D = numpy.squeeze(numpy.asarray(
+                                QuadraticBezier(X_start[0:2,leg-1], X_control,
+                                                X_MR[0:2], t)))
+      X_next = numpy.matrix([[X_next_2D[0], X_next_2D[1], X_MR[2,0]]]).T
+      q_leg = OK.InverseKinematics_SL(q_leg, X_next, leg)
+      if q_leg is None:
+        print 'Failed when trying to reach: ', X_next.T
+
+      q_current[3*(leg-1):3*(leg-1)+3] = q_leg
+      reply = oncilla.sendConfiguration(q_current)
+
+      t = t + step
+  else:
+    print 'SwingLeg failed because the goal', X_MR.T
+    print ' is not reachable for leg', leg
     
-    t = t + step
-    
-    print '\t \t', X_next.T
-
-    q_goal = OK.InverseKinematics_SL(q_current[3*(leg-1):3*(leg-1)+3], 
-                                     X_next, leg)
-    q_current[3*(leg-1):3*(leg-1)+3] = q_goal
-    reply = oncilla.sendConfiguration(q_current)
-
   return q_current
 
 def MoveCOB(oncilla, X_goal, q_init, q_ref, speed, swingLeg):
@@ -152,32 +164,6 @@ def MoveCOB(oncilla, X_goal, q_init, q_ref, speed, swingLeg):
 
   q_goal = OK.InverseKinematics_COB_SL(q_init, X_goal, swingLeg)
   q_current = MoveToConfiguration(oncilla, q_init, q_goal)
-
-  #accuracy = 1.0
-
-  #X_current = OK.Relative_COB(q_init, q_ref, swingLeg)
-
-  #q_current = q_init
-
-  #startTime = time.time()
-
-  #while numpy.linalg.norm(X_goal - X_current) > accuracy:
-  #  X_next = X_goal - X_current
-  #  norm = numpy.linalg.norm(X_next) 
-  #  X_next = X_next/norm*min(norm, speed*(time.time() - startTime))
-  #  
-  #  startTime = time.time()
-
-  #  # q_current = OK.InverseKinematics_COB(q_current, X_next, swingLeg)
-  #  q_current = OK.InverseKinematics_COB_SL(q_current, X_next, swingLeg)
-
-  #  if q_current is not None:
-  #    reply = oncilla.sendConfiguration(q_current)
-  #  else:
-  #    print 'Fail'
-  #    return None
-
-  #  X_current = OK.Relative_COB(q_ref, q_current, swingLeg) 
 
   return q_current
 
@@ -242,7 +228,7 @@ def GaitSelection(q_current, u, prevLeg):
 
 def QuadShift(oncilla, q_current, swingLeg):
   # Move the body to position the COG inside the upcoming support polygon
-  margin = 5.0
+  margin = 10.0
 
   feet = OK.RelativeFootPositions(q_current) 
   feet = numpy.delete(feet, 0, axis=0) # remove x-coordinates
@@ -256,16 +242,14 @@ def QuadShift(oncilla, q_current, swingLeg):
 
   # Movement should be ortoghonal to trot line 
   move_dir = numpy.array([trot_dir[1], -trot_dir[0]])
-  if swingLeg == 3 or swingLeg == 4:
-    move_dir = -1.0*move_dir
 
+  speed = 30.0
   X_start = numpy.array([0.0, 0.0])
   if not PointInTriangle(X_start, P1, P2, P3):
     X_goal_2D = VectorIntersection(P3, X_start, trot_dir, move_dir)
-    X_goal_3D = numpy.matrix([[0.0], [X_goal_2D[0]], [X_goal_2D[1]]])
+    X_goal = numpy.matrix([[0.0], [X_goal_2D[0]], [X_goal_2D[1]]])
 
-    q_goal = OK.InverseKinematics_COB_SL(q_current, X_goal_3D, swingLeg)
-    q_current = MoveToConfiguration(oncilla, q_current, q_goal)
+    MoveCOB(oncilla, X_goal, q_current, oncilla.q_ref, speed, swingLeg)
 
   return q_current
 
@@ -297,10 +281,10 @@ def SwingShift(oncilla, q_current, leg):
     X_goal_2D = CenterOfLineSegment(frontStabilityLineCenter, 
                                     numpy.array([0.0, 0.0]))
 
-  X_goal_3D = numpy.array([0.0, X_goal_2D[0], X_goal_2D[1]])
-  X_goal = numpy.resize(X_goal_3D, (3,1))
-  q_goal = OK.InverseKinematics_COB_SL(q_current, X_goal, leg)
-  q_current = MoveToConfiguration(oncilla, q_current, q_goal)
+  X_goal = numpy.array([[0.0], [X_goal_2D[0]], [X_goal_2D[1]]])
+
+  speed = 30.0
+  MoveCOB(oncilla, X_goal, q_current, oncilla.q_ref, speed, leg)
 
   return q_current
   
@@ -308,13 +292,12 @@ def StaticGait(oncilla, q_current, u):
   leg = 0     
   q = q_current
 
-  for i in xrange(0,16):
+  for i in xrange(0,8):
     leg = GaitSelection(q, u, leg)
     print 'Chosen leg: ', leg
     oncilla.swingLeg = leg
     q = QuadShift(oncilla, q, leg)
-    q = SwingShift(oncilla, q, leg)
     q = SwingLeg(oncilla, q, leg)
-    time.sleep(2)
+    q = SwingShift(oncilla, q, leg)
     print '------------------------------' 
 
