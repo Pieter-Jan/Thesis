@@ -28,7 +28,11 @@ def VisualizeRobot(oncilla, q, showSupportPolygon=False):
   oncilla.screen.blit(label, (25, 10))
 
   # XY Plane
-  conv = np.asarray([int(250 + y), int(150 + x)])
+  if not oncilla.fixCenter:
+    conv = np.asarray([int(250 + y), int(150 + x)])
+  else:
+    conv = np.asarray([int(250), int(150)])
+  
   for leg in range(0, 4):
     pygame.draw.line(oncilla.screen, white, np.asarray([0.0, 0.0]) + conv, np.asarray([OK.Rs[leg], 0.0]) + conv, 5)
     pygame.draw.line(oncilla.screen, white, np.asarray([OK.Rs[leg], 0.0]) + conv, np.array([knees[1, leg], knees[0, leg]]) + conv, 5)
@@ -39,7 +43,10 @@ def VisualizeRobot(oncilla, q, showSupportPolygon=False):
     pygame.draw.circle(oncilla.screen, red, np.array([int(knees[1, leg]), int(knees[0, leg])]) + conv, 10)
 
   # YZ Plane
-  conv = np.asarray([int(700 + y), int(200 + z)])
+  if not oncilla.fixCenter:
+    conv = np.asarray([int(700 + y), int(200 + z)])
+  else:
+    conv = np.asarray([int(700), int(200)])
 
   if showSupportPolygon == True:
     supportFeet = numpy.delete(feet, oncilla.swingLeg-1, axis=1)

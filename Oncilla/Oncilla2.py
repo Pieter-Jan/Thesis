@@ -33,6 +33,7 @@ class OncillaHardware:
     screen = None
     showSupportPolygon = False
     swingLeg = 1
+    fixCenter = False
     q_ref = numpy.array([0.0, 135.0, 90.0, 
                          0.0, 135.0, 90.0, 
                          0.0, 135.0, 90.0, 

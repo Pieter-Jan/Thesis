@@ -318,7 +318,7 @@ def Trilateration(P1, P2, P3, A, B, C):
   return numpy.linalg.pinv(G)*h
 
 def InverseKinematics_SL(q_init_leg, X_goal_leg, leg):
-  accuracy = 0.01
+  accuracy = 0.1
   maxIter = 100
 
   X_current = FootPositions_SL(q_init_leg[0], q_init_leg[1], q_init_leg[2], leg)
@@ -341,10 +341,10 @@ def InverseKinematics_SL(q_init_leg, X_goal_leg, leg):
 
     i = i + 1
 
-  if i <= maxIter:
+  if i < maxIter:
     return q_cur
   else:
-    print 'Fail'
+    print 'InverseKinematics_SL failed'
     return None
 
 def InverseKinematics_COB(q_init, X_G, swingLeg):
@@ -415,10 +415,11 @@ def InverseKinematics_COB_SL(q_init, X_G, swingLeg):
 
     i += 1
      
-  if i >= maxIter:
+  if i < maxIter:
+    return qa
+  else:
     print 'InverseKinematics_COB_SL failed'
-
-  return qa
+    return None
 
 def Relative_COB(q_start, q_current, swingLeg):
   # Calculates the position 
