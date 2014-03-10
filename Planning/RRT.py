@@ -1,4 +1,8 @@
 # Pieter-Jan Van de Maele 
+import sys
+sys.path.append('../Global')
+
+import MathExtra
 import math
 import numpy
 from scipy.interpolate import interp1d
@@ -98,7 +102,7 @@ def RRT_Connect_Planner(q_init, q_goal, numberOfNodes, delta_q, terrain, q_limit
 
   i = 1
   for k in range(1, numberOfNodes):
-    q_rand = q_limits[0,:] + (q_limits[1,:] - q_limits[0,:])*numpy.random.rand(len(q_limits[0,:]))
+    q_rand = q_limits[0,:] + (q_limits[1,:] - q_limits[0,:])*numpy.random.rand(len(q_limits))
     
     if(Extend(tree_1, q_rand, delta_q, terrain) is not TRAPPED):
       if(Connect(tree_2, q_new_global, delta_q, terrain) is REACHED):
@@ -108,7 +112,6 @@ def RRT_Connect_Planner(q_init, q_goal, numberOfNodes, delta_q, terrain, q_limit
       else:
         tree_1, tree_2 = tree_a, tree_b
     i *= -1
-  
   return tree_a, tree_b, FAILURE
     
 def Connect(tree, q, delta_q, terrain):
@@ -136,11 +139,4 @@ def Path(tree_a, tree_b):
   path_raw = path_a + path_b
 
   return tree_a, tree_b, path_raw
-
-  
-  
-
-    
-    
-    
 

@@ -38,3 +38,5 @@ reply = oh.sendConfiguration(q1)
 gamma1 = 100.0*math.pi/180.0
 q2 = numpy.array([alpha1, beta1, gamma1, alpha2, beta2, gamma2, alpha3, beta3, gamma3, alpha4, beta4, gamma4])
 reply = oh.sendConfiguration(q2)
+
+def 

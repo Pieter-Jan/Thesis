@@ -14,6 +14,7 @@ B	Oncilla/Maths.py	/^B = sympy.Symbol('B')$/;"	v
 Bs	Oncilla/OncillaKinematics.py	/^Bs = [56.0, 56.0, 65.0, 65.0]$/;"	v
 Build_RRT	Planning/RRT.py	/^def Build_RRT(q_init, numberOfNodes, delta_q, terrain, q_limits):$/;"	f
 C	Oncilla/Maths.py	/^C = sympy.Symbol('C')$/;"	v
+CenterOfFrontStabilityLine	Oncilla/OncillaMovement.py	/^def CenterOfFrontStabilityLine(q_current, swingLeg):$/;"	f
 CenterOfLineSegment	Oncilla/OncillaMovement.py	/^def CenterOfLineSegment(P1, P2):$/;"	f
 CollisionFree	Planning/RRT.py	/^def CollisionFree(node, terrain):$/;"	f
 Connect	Planning/RRT.py	/^def Connect(tree, q, delta_q, terrain):$/;"	f
@@ -50,13 +51,15 @@ Jacobian_SL	Oncilla/OncillaKinematics.py	/^def Jacobian_SL(alpha, beta, gamma, l
 Jacobian_SwingFoot	Oncilla/OncillaKinematics.py	/^def Jacobian_SwingFoot(X_B, q_a, leg=1):$/;"	f
 KNEE	Oncilla/Oncilla2.py	/^    KNEE = 1$/;"	v	class:OncillaHardware
 KneePositions_SL	Oncilla/OncillaKinematics.py	/^def KneePositions_SL(alpha, beta, gamma, leg):$/;"	f
+MaxLegLength	Oncilla/OncillaMovement.py	/^def MaxLegLength(leg):$/;"	f
 MaximumReachPoint	Oncilla/OncillaMovement.py	/^def MaximumReachPoint(q_current, leg):$/;"	f
+MoveCOB	Oncilla/OncillaMovement.py	/^def MoveCOB(oncilla, X_goal, q_init, q_ref, speed, swingLeg):$/;"	f
 MoveToConfiguration	Oncilla/OncillaMovement.py	/^def MoveToConfiguration(oncilla, q_start, q_goal):$/;"	f
-Move_COB	Oncilla/OncillaMovement.py	/^def Move_COB(oncilla, X_goal, q_init, q_ref, speed, swingLeg):$/;"	f
 Node	Planning/RRT.py	/^class Node:$/;"	c
 OK	Oncilla/OncillaMovement.py	/^import OncillaKinematics as OK$/;"	i
 OK	Oncilla/OncillaVisualization.py	/^import OncillaKinematics as OK$/;"	i
 OK	Test/Test_Cirkel.py	/^import OncillaKinematics as OK$/;"	i
+OK	Test/Test_InverseKinematics_SL.py	/^import OncillaKinematics as OK$/;"	i
 OK	Test/Test_MaxLegLengths.py	/^import OncillaKinematics as OK$/;"	i
 OK	Test/Test_MoveInZPLane.py	/^import OncillaKinematics as OK$/;"	i
 OK	Test/Test_Pompen.py	/^import OncillaKinematics as OK$/;"	i
@@ -68,6 +71,7 @@ OK	Test/Test_StaticGait.py	/^import OncillaKinematics as OK$/;"	i
 OK	Test/Test_SupportPolygon.py	/^import OncillaKinematics as OK$/;"	i
 OK	Test/Test_ThreeLeggedStance.py	/^import OncillaKinematics as OK$/;"	i
 OM	Test/Test_Cirkel.py	/^import OncillaMovement as OM$/;"	i
+OM	Test/Test_InverseKinematics_SL.py	/^import OncillaMovement as OM$/;"	i
 OM	Test/Test_MaxLegLengths.py	/^import OncillaMovement as OM$/;"	i
 OM	Test/Test_MoveInZPLane.py	/^import OncillaMovement as OM$/;"	i
 OM	Test/Test_Pompen.py	/^import OncillaMovement as OM$/;"	i
@@ -83,6 +87,7 @@ OV	Test/Test_SupportPolygon.py	/^import OncillaVisualization as OV$/;"	i
 OV	Test/Test_ThreeLeggedStance.py	/^import OncillaVisualization as OV$/;"	i
 Oncilla2	Oncilla/OncillaMovement.py	/^import Oncilla2$/;"	i
 Oncilla2	Test/Test_Cirkel.py	/^import Oncilla2$/;"	i
+Oncilla2	Test/Test_InverseKinematics_SL.py	/^import Oncilla2$/;"	i
 Oncilla2	Test/Test_MaxLegLengths.py	/^import Oncilla2$/;"	i
 Oncilla2	Test/Test_MoveInZPLane.py	/^import Oncilla2$/;"	i
 Oncilla2	Test/Test_Pompen.py	/^import Oncilla2$/;"	i
@@ -100,6 +105,8 @@ P2_acc	Test/Test_Triangles.py	/^P2_acc = P2 - u21*margin + u32*margin$/;"	v
 P3	Test/Test_ReducedSupportPolygon.py	/^P3 = numpy.squeeze(numpy.asarray(supportFeet[:,2]))$/;"	v
 P3	Test/Test_Triangles.py	/^P3 = numpy.array([2.0, 4.0])$/;"	v
 P3_acc	Test/Test_Triangles.py	/^P3_acc = P3 - u32*margin - u31*margin$/;"	v
+P_stabCenter	Test/Test_ReducedSupportPolygon.py	/^  P_stabCenter = OM.CenterOfLineSegment(P_stabCenter, numpy.array([0.0, 0.0]))$/;"	v
+P_stabCenter	Test/Test_ReducedSupportPolygon.py	/^P_stabCenter = OM.CenterOfFrontStabilityLine(q_ref, leg)$/;"	v
 Path	Planning/RRT.py	/^def Path(tree_a, tree_b):$/;"	f
 PointInTriangle	Oncilla/OncillaMovement.py	/^def PointInTriangle(p, a, b, c):$/;"	f
 Polygon	Oncilla/OncillaKinematics.py	/^from matplotlib.patches import Polygon$/;"	i
@@ -153,13 +160,14 @@ XDIM	Test/Test_RRT_OneTree.py	/^XDIM = 500$/;"	v
 XDIM	Test/Test_RRT_OneTree_Terrain.py	/^XDIM = 500$/;"	v
 X_goal	Test/Test_Cirkel.py	/^    X_goal = numpy.matrix([[30],[x],[y]])$/;"	v
 X_goal	Test/Test_Cirkel.py	/^X_goal = numpy.matrix([[30],[0.0],[0.0]])$/;"	v
+X_goal	Test/Test_InverseKinematics_SL.py	/^X_goal = numpy.array([[float(sys.argv[2])], [float(sys.argv[3])],$/;"	v
 X_goal	Test/Test_MoveInZPLane.py	/^  X_goal = numpy.matrix([[20.0],[-15.0],[-15.0]])$/;"	v
 X_goal	Test/Test_MoveInZPLane.py	/^  X_goal = numpy.matrix([[20.0],[15.0],[15.0]])$/;"	v
 X_goal	Test/Test_MoveInZPLane.py	/^X_goal = numpy.matrix([[20.0],[0.0],[0.0]])$/;"	v
 X_goal	Test/Test_Pompen.py	/^  X_goal = numpy.matrix([[0.0],[0.0],[0.0]])$/;"	v
 X_goal	Test/Test_Pompen.py	/^  X_goal = numpy.matrix([[30.0],[0.0],[0.0]])$/;"	v
 X_goal	Test/Test_QuadShift.py	/^X_goal = numpy.array([[20.0], [0.0], [0.0]])$/;"	v
-X_goal	Test/Test_StaticGait.py	/^X_goal = numpy.array([[20], [0.0], [0.0]])$/;"	v
+X_goal	Test/Test_StaticGait.py	/^X_goal = numpy.array([[15], [0.0], [0.0]])$/;"	v
 YDIM	Oncilla/Oncilla2.py	/^YDIM = 400$/;"	v
 YDIM	Test/Test_RRT.py	/^YDIM = 500$/;"	v
 YDIM	Test/Test_RRT_OneTree.py	/^YDIM = 500$/;"	v
@@ -171,6 +179,7 @@ __init__	Planning/RRT.py	/^  def __init__(self, q_init):$/;"	m	class:Tree
 _anglesToFloat	Oncilla/Oncilla2.py	/^    def _anglesToFloat(self,angles):$/;"	m	class:OncillaHardware
 addChild	Planning/RRT.py	/^  def addChild(self, child):$/;"	m	class:Node
 alpha	Oncilla/Maths.py	/^alpha = sympy.Symbol('alpha')$/;"	v
+alpha	Test/Test_ReducedSupportPolygon.py	/^  alpha=0.5))$/;"	v
 alpha1	Test/Test_Servo.py	/^alpha1 = -10.0*math.pi\/180.0$/;"	v
 alpha1	Test/Test_SupportPolygon.py	/^alpha1 = 15.0*math.pi\/180.0$/;"	v
 alpha1	Test/Test_ThreeLeggedStance.py	/^alpha1 = 25.0*math.pi\/180.0$/;"	v
@@ -205,6 +214,7 @@ delta_q	Test/Test_RRT_OneTree_Terrain.py	/^delta_q = 1.0*10$/;"	v
 euclidian_distance	Planning/RRT.py	/^def euclidian_distance(node1, node2):$/;"	f
 feet	Test/Test_ReducedSupportPolygon.py	/^feet = OK.RelativeFootPositions(q_ref)$/;"	v
 feet	Test/Test_ReducedSupportPolygon.py	/^feet = numpy.delete(feet, 0, axis=0)$/;"	v
+fixCenter	Oncilla/Oncilla2.py	/^    fixCenter = False$/;"	v	class:OncillaHardware
 footsize	Planning/RRT.py	/^footsize = 50$/;"	v
 gamma	Oncilla/Maths.py	/^gamma = sympy.Symbol('gamma')$/;"	v
 gamma1	Test/Test_Servo.py	/^gamma1 = 100.0*math.pi\/180.0$/;"	v
@@ -223,8 +233,9 @@ green	Test/Test_RRT_OneTree.py	/^green = 0, 255, 0$/;"	v
 green	Test/Test_RRT_OneTree_Terrain.py	/^green = 0, 255, 0$/;"	v
 interp1d	Planning/RRT.py	/^from scipy.interpolate import interp1d$/;"	i
 interp1d	Planning/TS_RRT.py	/^from scipy.interpolate import interp1d$/;"	i
+leg	Test/Test_InverseKinematics_SL.py	/^leg = int(sys.argv[1])$/;"	v
 leg	Test/Test_QuadShift.py	/^leg = 2$/;"	v
-leg	Test/Test_ReducedSupportPolygon.py	/^leg = 1$/;"	v
+leg	Test/Test_ReducedSupportPolygon.py	/^leg = 3$/;"	v
 margin	Test/Test_ReducedSupportPolygon.py	/^margin = 0.5$/;"	v
 margin	Test/Test_Triangles.py	/^margin = 0.5$/;"	v
 marshal	Oncilla/Oncilla2.py	/^import marshal$/;"	i
@@ -234,6 +245,7 @@ math	Oncilla/OncillaVisualization.py	/^import math$/;"	i
 math	Planning/RRT.py	/^import math$/;"	i
 math	Planning/TS_RRT.py	/^import math$/;"	i
 math	Test/Test_Cirkel.py	/^import math$/;"	i
+math	Test/Test_InverseKinematics_SL.py	/^import math$/;"	i
 math	Test/Test_MaxLegLengths.py	/^import math$/;"	i
 math	Test/Test_MoveInZPLane.py	/^import math$/;"	i
 math	Test/Test_Pompen.py	/^import math$/;"	i
@@ -248,6 +260,7 @@ matplotlib	Oncilla/OncillaKinematics.py	/^import matplotlib.pyplot as plt$/;"	i
 matplotlib	Oncilla/OncillaMovement.py	/^import matplotlib.pyplot as plt$/;"	i
 matplotlib	Oncilla/OncillaVisualization.py	/^import matplotlib.pyplot as plt$/;"	i
 matplotlib	Test/Test_Cirkel.py	/^import matplotlib.pyplot as plt$/;"	i
+matplotlib	Test/Test_InverseKinematics_SL.py	/^import matplotlib.pyplot as plt$/;"	i
 matplotlib	Test/Test_MaxLegLengths.py	/^import matplotlib.pyplot as plt$/;"	i
 matplotlib	Test/Test_MoveInZPLane.py	/^import matplotlib.pyplot as plt$/;"	i
 matplotlib	Test/Test_Pompen.py	/^import matplotlib.pyplot as plt$/;"	i
@@ -276,6 +289,7 @@ numpy	Oncilla/OncillaVisualization.py	/^import numpy$/;"	i
 numpy	Planning/RRT.py	/^import numpy$/;"	i
 numpy	Planning/TS_RRT.py	/^import numpy$/;"	i
 numpy	Test/Test_Cirkel.py	/^import numpy$/;"	i
+numpy	Test/Test_InverseKinematics_SL.py	/^import numpy$/;"	i
 numpy	Test/Test_MaxLegLengths.py	/^import numpy$/;"	i
 numpy	Test/Test_MoveInZPLane.py	/^import numpy$/;"	i
 numpy	Test/Test_Pompen.py	/^import numpy$/;"	i
@@ -302,6 +316,7 @@ plt	Oncilla/OncillaKinematics.py	/^import matplotlib.pyplot as plt$/;"	i
 plt	Oncilla/OncillaMovement.py	/^import matplotlib.pyplot as plt$/;"	i
 plt	Oncilla/OncillaVisualization.py	/^import matplotlib.pyplot as plt$/;"	i
 plt	Test/Test_Cirkel.py	/^import matplotlib.pyplot as plt$/;"	i
+plt	Test/Test_InverseKinematics_SL.py	/^import matplotlib.pyplot as plt$/;"	i
 plt	Test/Test_MaxLegLengths.py	/^import matplotlib.pyplot as plt$/;"	i
 plt	Test/Test_MoveInZPLane.py	/^import matplotlib.pyplot as plt$/;"	i
 plt	Test/Test_Pompen.py	/^import matplotlib.pyplot as plt$/;"	i
@@ -328,7 +343,7 @@ q	Test/Test_Pompen.py	/^  q = OM.Move_COB(oh, X_goal, q, q_start, speed, 1)$/;"	
 q	Test/Test_Pompen.py	/^q = q_start$/;"	v
 q	Test/Test_QuadShift.py	/^q = OM.Move_COB(oh, X_goal, q_start, q_start, speed, leg) $/;"	v
 q	Test/Test_QuadShift.py	/^q = OM.QuadShift(oh, q, leg)$/;"	v
-q	Test/Test_StaticGait.py	/^q = OM.Move_COB(oh, X_goal, q_start, q_start, speed, swingLeg=1) $/;"	v
+q	Test/Test_StaticGait.py	/^q = OM.MoveCOB(oh, X_goal, q_start, q_start, speed, swingLeg=1) $/;"	v
 q	Test/Test_StaticGait.py	/^q = OM.StaticGait(oh, q, u)$/;"	v
 q1	Test/Test_Servo.py	/^q1 = numpy.array([alpha1, beta1, gamma1, alpha2, beta2, gamma2, alpha3, beta3, gamma3, alpha4, beta4, gamma4])$/;"	v
 q2	Test/Test_Servo.py	/^q2 = numpy.array([alpha1, beta1, gamma1, alpha2, beta2, gamma2, alpha3, beta3, gamma3, alpha4, beta4, gamma4])$/;"	v
@@ -337,6 +352,7 @@ q_limits	Test/Test_RRT.py	/^q_limits = numpy.array([[0.0, 0.0],[500.0, 500.0]])$
 q_limits	Test/Test_RRT_OneTree.py	/^q_limits = numpy.array([[0.0, 0.0],[500.0, 500.0]])$/;"	v
 q_limits	Test/Test_RRT_OneTree_Terrain.py	/^q_limits = numpy.array([[0.0, 0.0],[500.0, 500.0]])$/;"	v
 q_ref	Oncilla/Oncilla2.py	/^    q_ref = numpy.array([0.0, 135.0, 90.0, $/;"	v	class:OncillaHardware
+q_ref	Test/Test_InverseKinematics_SL.py	/^q_ref = numpy.array([0.0, 135.0, 90.0, $/;"	v
 q_ref	Test/Test_ReducedSupportPolygon.py	/^q_ref = numpy.array([0.0, 135.0, 90.0, $/;"	v
 q_start	Test/Test_Cirkel.py	/^q_start = numpy.array([0.0, 135.0, 90.0, $/;"	v
 q_start	Test/Test_MaxLegLengths.py	/^q_start = numpy.array([0.0, 135.0, 90.0, $/;"	v
@@ -379,6 +395,7 @@ sympy	Oncilla/Maths.py	/^import sympy $/;"	i
 sympy	Oncilla/Maths.py	/^import sympy$/;"	i
 sys	Oncilla/OncillaMovement.py	/^import sys$/;"	i
 sys	Test/Test_Cirkel.py	/^import sys$/;"	i
+sys	Test/Test_InverseKinematics_SL.py	/^import sys$/;"	i
 sys	Test/Test_MaxLegLengths.py	/^import sys$/;"	i
 sys	Test/Test_MoveInZPLane.py	/^import sys$/;"	i
 sys	Test/Test_Pompen.py	/^import sys$/;"	i
@@ -396,6 +413,7 @@ terrain	Test/Test_RRT_OneTree.py	/^terrain = numpy.ones(500)*(500) $/;"	v
 terrain	Test/Test_RRT_OneTree_Terrain.py	/^terrain = numpy.ones(500)*(400) $/;"	v
 time	Oncilla/OncillaMovement.py	/^import time$/;"	i
 time	Test/Test_Cirkel.py	/^import time$/;"	i
+time	Test/Test_InverseKinematics_SL.py	/^import time$/;"	i
 time	Test/Test_MaxLegLengths.py	/^import time$/;"	i
 time	Test/Test_MoveInZPLane.py	/^import time$/;"	i
 time	Test/Test_Pompen.py	/^import time$/;"	i

@@ -28,12 +28,15 @@ class OncillaHardware:
     FRONT_RIGHT = 2
     HIND_LEFT = 3
     HIND_RIGHT = 4
+
+    closed = True
   
     SIMULATION = False
     screen = None
     showSupportPolygon = False
     swingLeg = 1
     fixCenter = False
+
     q_ref = numpy.array([0.0, 135.0, 90.0, 
                          0.0, 135.0, 90.0, 
                          0.0, 135.0, 90.0, 
@@ -95,3 +98,4 @@ class OncillaHardware:
                 if isinstance(angles[leg][i], generic):
                     angles[leg][i] = asscalar(angles[leg][i])
         return angles
+

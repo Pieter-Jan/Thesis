@@ -17,7 +17,7 @@ numpy.set_printoptions(precision=4)
 # Oncilla hardware object
 oh = Oncilla2.OncillaHardware(simulation=True)
 oh.showSupportPolygon = True
-oh.fixCenter = False
+oh.fixCenter = True
 
 alpha1 = alpha2 = 0.0*math.pi/180.0
 beta1 = beta2 = 135.0*math.pi/180.0
@@ -36,11 +36,9 @@ oh.q_ref = q_start
 raw_input("Press key to continue")
 
 speed = 30.0
-X_goal = numpy.array([[10], [0.0], [0.0]])
+X_goal = numpy.array([[15], [0.0], [0.0]])
 q = OM.MoveCOB(oh, X_goal, q_start, q_start, speed, swingLeg=1) 
 
 u = numpy.array([0.0, 1.0, 0.0])
 q = OM.StaticGait(oh, q, u)
 
-while True:
-  None

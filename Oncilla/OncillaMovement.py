@@ -1,5 +1,6 @@
 import sys
 sys.path.append('../Planning')
+sys.path.append('../Global')
 
 import numpy
 import math
@@ -9,26 +10,14 @@ import RRT
 import Oncilla2
 import time
 import matplotlib.pyplot as plt
+import MathExtra
+
 from matplotlib.patches import Polygon
 numpy.set_printoptions(precision=5)
 numpy.set_printoptions(suppress=True)
 
 def QuadraticBezier(P0, P1, P2, t):
   return P0*(1-t)**2 + 2*P1*(1-t)*t + P2*t**2
-
-def SameSide(p1,p2, a,b):
-  cp1 = numpy.cross(b-a, p1-a)
-  cp2 = numpy.cross(b-a, p2-a)
-  if numpy.dot(cp1, cp2) >= 0: 
-    return True
-  else: 
-    return False
-
-def PointInTriangle(p, a, b, c):
-  if SameSide(p,a, b,c) and SameSide(p,b, a,c) and SameSide(p,c, a,b): 
-      return True
-  else:
-    return False
 
 def CenterOfLineSegment(P1, P2):
   x = (P1[0] + P2[0]) / 2.0
@@ -100,12 +89,17 @@ def MaximumReachPoint(q_current, leg):
   else:
     y = -1.0*float("inf")
 
+  print '\t leg ', leg, ': \t', x, y, z
+  print '\t \t \t', shoulder
+
+  y *= 3.0/4.0
   X_MR = numpy.array([x, y, z]) + shoulder
+  #X_MR[2] = min(X_MR[2], 80.0)
 
   return X_MR 
 
 def MoveToConfiguration(oncilla, q_start, q_goal):
-  tree_a, tree_b, plan = RRT.RRT_Connect_Planner(q_start, q_goal, 1000, 0.01, 
+  tree_a, tree_b, plan = RRT.RRT_Connect_Planner(q_start, q_goal, 1000, 0.02, 
                                                  None, OK.q_limits) 
   
   if plan is not RRT.FAILURE:
@@ -119,19 +113,15 @@ def SwingLeg(oncilla, q_current, leg):
   X_start = OK.RelativeFootPositions(q_current)
 
   X_MR = MaximumReachPoint(q_current, leg)
-  print 'X_MR after shift: \t', X_MR
   X_MR = numpy.matrix(X_MR.reshape(3,1))
 
   q_leg = q_current[3*(leg-1):3*(leg-1)+3]
   q_goal = OK.InverseKinematics_SL(q_leg, X_MR, leg)
 
-  control_y = X_start[1, leg-1]# + abs(X_MR[1] - X_start[1, leg-1])/2.0 
-  X_control = numpy.matrix([[X_start[0, leg-1]-20.0, 
-                               control_y
-                               ]]).T
+  control_y = X_start[1, leg-1] + (X_MR[1] - X_start[1, leg-1])/2.0 
+  X_control = numpy.matrix([[X_start[0, leg-1]-10.0, control_y]]).T
 
   if q_goal is not None:
-
     # q_current[3*(leg-1):3*(leg-1)+3] = q_goal
     # reply = oncilla.sendConfiguration(q_current)
 
@@ -163,7 +153,12 @@ def MoveCOB(oncilla, X_goal, q_init, q_ref, speed, swingLeg):
   # q_ref: reference configuration (X_B = 0, 0, 0)
 
   q_goal = OK.InverseKinematics_COB_SL(q_init, X_goal, swingLeg)
-  q_current = MoveToConfiguration(oncilla, q_init, q_goal)
+
+  if q_goal is not None:
+    q_current = MoveToConfiguration(oncilla, q_init, q_goal)
+
+  else:
+    q_current = None
 
   return q_current
 
@@ -199,12 +194,13 @@ def GaitSelection(q_current, u, prevLeg):
   if prevLeg != 0:
     legs[prevLeg-1] = 0
 
-  #if prevLeg == 1 or prevLeg == 2:
-  #  legs[0] = 0
-  #  legs[1] = 0
-  #elif prevLeg == 3 or prevLeg == 4:
-  #  legs[2] = 0
-  #  legs[3] = 0
+  # TODO: remove leg if it leaves an insufficient support polgyon
+  # if prevLeg == 1 or prevLeg == 2:
+  #   legs[0] = 0
+  #   legs[1] = 0
+  # elif prevLeg == 3 or prevLeg == 4:
+  #   legs[2] = 0
+  #   legs[3] = 0
 
   for leg in xrange(1, 5):
     if legs[leg-1] == 1:
@@ -215,10 +211,6 @@ def GaitSelection(q_current, u, prevLeg):
       progress = numpy.dot(progressVector, u)
 
       relProgress = progress/MaxLegLength(leg)
-
-      print 'leg ', leg
-      print '\tprogress: \t', relProgress
-      print '\tX_MR: \t ', X_MR
 
       if relProgress > prevRelProgress:
         prevRelProgress = relProgress
@@ -245,32 +237,36 @@ def QuadShift(oncilla, q_current, swingLeg):
 
   speed = 30.0
   X_start = numpy.array([0.0, 0.0])
-  if not PointInTriangle(X_start, P1, P2, P3):
+  if not MathExtra.PointInTriangle(X_start, P1, P2, P3):
     X_goal_2D = VectorIntersection(P3, X_start, trot_dir, move_dir)
     X_goal = numpy.matrix([[0.0], [X_goal_2D[0]], [X_goal_2D[1]]])
 
-    MoveCOB(oncilla, X_goal, q_current, oncilla.q_ref, speed, swingLeg)
+    q_current = MoveCOB(oncilla, X_goal, q_current, q_current, speed, swingLeg)
+    if q_current is None:
+      print 'Quadshift failed'
 
   return q_current
 
 def CenterOfFrontStabilityLine(q_current, swingLeg):
-
   feet = OK.RelativeFootPositions(q_current) 
   feet = numpy.delete(feet, 0, axis=0) # remove x-coordinates
 
+  margin = 10.0
+  P1, P2, P3 = ReducedSupportPolygon(q_current, margin, swingLeg)
+
   if swingLeg == 1:
-    P1 = numpy.squeeze(numpy.asarray(feet[:,2]))
-    P2 = numpy.squeeze(numpy.asarray(feet[:,1]))
-
+    P1_l, P2_l = P1, P2
+  
   elif swingLeg == 2:
-    P1 = numpy.squeeze(numpy.asarray(feet[:,0]))
-    P2 = numpy.squeeze(numpy.asarray(feet[:,3]))
+    P1_l, P2_l = P1, P3 
 
-  elif swingLeg == 3 or swingLeg == 4:
-    P1 = numpy.squeeze(numpy.asarray(feet[:,0]))
-    P2 = numpy.squeeze(numpy.asarray(feet[:,1]))
+  elif swingLeg == 3:
+    P1_l, P2_l = P1, P3 
 
-  return CenterOfLineSegment(P1, P2)
+  elif swingLeg == 4:
+    P1_l, P2_l = P2, P3 
+
+  return CenterOfLineSegment(P1_l, P2_l)
 
 def SwingShift(oncilla, q_current, leg):
   frontStabilityLineCenter = CenterOfFrontStabilityLine(q_current, leg)
@@ -284,7 +280,9 @@ def SwingShift(oncilla, q_current, leg):
   X_goal = numpy.array([[0.0], [X_goal_2D[0]], [X_goal_2D[1]]])
 
   speed = 30.0
-  MoveCOB(oncilla, X_goal, q_current, oncilla.q_ref, speed, leg)
+  q_current = MoveCOB(oncilla, X_goal, q_current, q_current, speed, leg)
+  if q_current is None:
+    print 'Quadshift failed'
 
   return q_current
   
@@ -292,12 +290,37 @@ def StaticGait(oncilla, q_current, u):
   leg = 0     
   q = q_current
 
-  for i in xrange(0,8):
+  for i in xrange(0,12):
     leg = GaitSelection(q, u, leg)
     print 'Chosen leg: ', leg
     oncilla.swingLeg = leg
-    q = QuadShift(oncilla, q, leg)
-    q = SwingLeg(oncilla, q, leg)
-    q = SwingShift(oncilla, q, leg)
+
+    # send configuration to redraw the simulation window
+    reply = oncilla.sendConfiguration(q)
+
+    if q is not None:
+      q = QuadShift(oncilla, q, leg)
+      time.sleep(1)
+    else:
+      break
+
+    if q is not None:
+      q = SwingShift(oncilla, q, leg)
+      time.sleep(1)
+    else:
+      break
+
+    if q is not None:
+      q = SwingLeg(oncilla, q, leg)
+      time.sleep(1)
+    else:
+      break
     print '------------------------------' 
+
+  oncilla.close()
+  # Waiting until error is observed
+  while True:
+    None
+
+
 

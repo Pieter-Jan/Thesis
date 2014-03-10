@@ -436,4 +436,3 @@ def Relative_COB(q_start, q_current, swingLeg):
   C = numpy.linalg.norm(P_current[:,2])
 
   return Trilateration(P_start[:,0], P_start[:,1], P_start[:,2], A, B, C)
-
