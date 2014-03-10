@@ -152,6 +152,7 @@ def MoveCOB(oncilla, X_goal, q_init, q_ref, speed, swingLeg):
   # q_init: current configuration of robot
   # q_ref: reference configuration (X_B = 0, 0, 0)
 
+  print 'q_init: ', q_init
   q_goal = OK.InverseKinematics_COB_SL(q_init, X_goal, swingLeg)
 
   if q_goal is not None:
@@ -243,7 +244,7 @@ def QuadShift(oncilla, q_current, swingLeg):
 
     q_current = MoveCOB(oncilla, X_goal, q_current, q_current, speed, swingLeg)
     if q_current is None:
-      print 'Quadshift failed'
+      print 'Quadshift failed when trying to reach ', X_goal
 
   return q_current
 

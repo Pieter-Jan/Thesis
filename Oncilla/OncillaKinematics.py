@@ -378,8 +378,9 @@ def InverseKinematics_COB(q_init, X_G, swingLeg):
 def InverseKinematics_COB_SL(q_init, X_G, swingLeg):
   # Inverse kinematics for COB based on single leg jacobians
   # gives configuration q to move to goal state X_G relative to current state
-  
-  X_B_Current = numpy.matrix([[0.0, 0.0, 0.0]])
+
+  X_G = numpy.matrix([[X_G.item(0)], [X_G.item(1)], [X_G.item(2)]])
+  X_B_Current = numpy.matrix([[0.0], [0.0], [0.0]])
 
   maxIter = 100
   accuracy = 1.0

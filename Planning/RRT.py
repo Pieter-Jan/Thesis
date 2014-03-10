@@ -102,7 +102,8 @@ def RRT_Connect_Planner(q_init, q_goal, numberOfNodes, delta_q, terrain, q_limit
 
   i = 1
   for k in range(1, numberOfNodes):
-    q_rand = q_limits[0,:] + (q_limits[1,:] - q_limits[0,:])*numpy.random.rand(len(q_limits))
+    q_rand = q_limits[0,:] + (q_limits[1,:] -
+        q_limits[0,:])*numpy.random.rand(len(q_limits[0,:]))
     
     if(Extend(tree_1, q_rand, delta_q, terrain) is not TRAPPED):
       if(Connect(tree_2, q_new_global, delta_q, terrain) is REACHED):
