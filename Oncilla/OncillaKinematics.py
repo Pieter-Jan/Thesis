@@ -82,14 +82,26 @@ def Jacobian_SL(alpha, beta, gamma, leg):
   A, B, C, Q, R, S = As[leg-1], Bs[leg-1], Cs[leg-1], Qs[leg-1], Rs[leg-1], Ss[leg-1]
 
   if not flip:
-    J = numpy.matrix([[(-(A+C)*math.sin(alpha)+B*math.sin(alpha+beta))*math.sin(gamma), B*math.sin(alpha+beta)*math.sin(gamma), ((A+C)*math.cos(alpha)-B*math.cos(alpha+beta))*math.cos(gamma)], 
-                      [(A+C)*math.cos(alpha)-B*math.cos(alpha+beta), -B*math.cos(alpha+beta), 0.0],
-                      [(-(A+C)*math.sin(alpha)+B*math.sin(alpha+beta))*math.cos(gamma), B*math.sin(alpha+beta)*math.cos(gamma), (-(A+C)*math.cos(alpha)+B*math.cos(alpha+beta))*math.sin(gamma)]]) 
+    J = numpy.matrix([[(-(A+C)*math.sin(alpha)+B*math.sin(alpha+beta))*math.sin(gamma), 
+                        B*math.sin(alpha+beta)*math.sin(gamma), 
+                        ((A+C)*math.cos(alpha)-B*math.cos(alpha+beta))*math.cos(gamma)], 
+                      [(A+C)*math.cos(alpha)-B*math.cos(alpha+beta), 
+                       -B*math.cos(alpha+beta), 
+                       0.0],
+                      [(-(A+C)*math.sin(alpha)+B*math.sin(alpha+beta))*math.cos(gamma), 
+                        B*math.sin(alpha+beta)*math.cos(gamma), 
+                        (-(A+C)*math.cos(alpha)+B*math.cos(alpha+beta))*math.sin(gamma)]]) 
 
   else:
-    J = numpy.matrix([[(-(A+C)*math.sin(alpha)+B*math.sin(alpha+beta))*math.sin(gamma), B*math.sin(alpha+beta)*math.sin(gamma), ((A+C)*math.cos(alpha)-B*math.cos(alpha+beta))*math.cos(gamma)], 
-                      [(A+C)*math.cos(alpha)-B*math.cos(alpha+beta), -B*math.cos(alpha+beta), 0.0],
-                      [((A+C)*math.sin(alpha)-B*math.sin(alpha+beta))*math.cos(gamma), -B*math.sin(alpha+beta)*math.cos(gamma), ((A+C)*math.cos(alpha)-B*math.cos(alpha+beta))*math.sin(gamma)]]) 
+    J = numpy.matrix([[(-(A+C)*math.sin(alpha)+B*math.sin(alpha+beta))*math.sin(gamma), 
+                        B*math.sin(alpha+beta)*math.sin(gamma), 
+                        ((A+C)*math.cos(alpha)-B*math.cos(alpha+beta))*math.cos(gamma)], 
+                      [(A+C)*math.cos(alpha)-B*math.cos(alpha+beta), 
+                       -B*math.cos(alpha+beta), 
+                       0.0],
+                      [((A+C)*math.sin(alpha)-B*math.sin(alpha+beta))*math.cos(gamma), 
+                       -B*math.sin(alpha+beta)*math.cos(gamma), 
+                       ((A+C)*math.cos(alpha)-B*math.cos(alpha+beta))*math.sin(gamma)]]) 
 
   return J
 
@@ -102,9 +114,20 @@ def FootPositions_SL(alpha, beta, gamma, leg):
   else:
     flip = True
 
-  A, B, C, Q, R, S = As[leg-1], Bs[leg-1], Cs[leg-1], Qs[leg-1], Rs[leg-1], Ss[leg-1]
+  A, B, C, Q, R, S = As[leg-1], Bs[leg-1], Cs[leg-1], \
+                     Qs[leg-1], Rs[leg-1], Ss[leg-1]
 
-  P_F_i = DH_BODY(Q, R, S, flip)*DH_SERVO(gamma)*DH_HIP(alpha, A)*DH_KNEE(beta, B)*DH_ANKLE(beta, C)*numpy.matrix('0.0; 0.0; 0.0; 1.0') 
+  P_F_i = DH_BODY(Q, R, S, flip)*DH_SERVO(gamma)*DH_HIP(alpha, A)* \
+          DH_KNEE(beta, B)*DH_ANKLE(beta, C)*numpy.matrix('0.0; 0.0; 0.0; 1.0') 
+
+  return P_F_i[0:3]
+
+def FootPositions_FromServo(alpha, beta, gamma, leg):
+
+  A, B, C = As[leg-1], Bs[leg-1], Cs[leg-1]
+
+  P_F_i = DH_SERVO(gamma)*DH_HIP(alpha, A)* \
+          DH_KNEE(beta, B)*DH_ANKLE(beta, C)*numpy.matrix('0.0; 0.0; 0.0; 1.0') 
 
   return P_F_i[0:3]
 
@@ -117,9 +140,11 @@ def KneePositions_SL(alpha, beta, gamma, leg):
   else:
     flip = True
 
-  A, B, C, Q, R, S = As[leg-1], Bs[leg-1], Cs[leg-1], Qs[leg-1], Rs[leg-1], Ss[leg-1]
+  A, B, C, Q, R, S = As[leg-1], Bs[leg-1], Cs[leg-1], \
+                     Qs[leg-1], Rs[leg-1], Ss[leg-1]
 
-  P_K_i = DH_BODY(Q, R, S, flip)*DH_SERVO(gamma)*DH_HIP(alpha, A)*numpy.matrix('0.0; 0.0; 0.0; 1.0') 
+  P_K_i = DH_BODY(Q, R, S, flip)*DH_SERVO(gamma)*DH_HIP(alpha, A)* \
+          numpy.matrix('0.0; 0.0; 0.0; 1.0') 
 
   return P_K_i[0:3]
 
@@ -160,21 +185,40 @@ def Jacobian_COB(X_B, q_a, swingLeg):
   X_B_4 = numpy.hstack([X_B, X_B, X_B, X_B]) 
 
   P_L = RelativeFootPositions(q_a)
-
   R_B = GetRotationMatrix(q_a, swingLeg)
 
   # Position of 4 feet in global system
   P_G = X_B_4 + R_B*P_L
 
   # Lengths of the 4 feet
-  L = numpy.vstack([numpy.linalg.norm(P_L[:,0]), numpy.linalg.norm(P_L[:,1]), numpy.linalg.norm(P_L[:,2]), numpy.linalg.norm(P_L[:,3])])
+  L = [numpy.linalg.norm(P_L[:,0]), 
+       numpy.linalg.norm(P_L[:,1]), 
+       numpy.linalg.norm(P_L[:,2]), 
+       numpy.linalg.norm(P_L[:,3])]
   
-  dL_on_dXb = numpy.matrix(X_B_4 - P_G).T/L 
+  # dL_on_dXb = numpy.matrix(X_B_4 - P_G).T/L 
+  dL_on_dXb = numpy.vstack([numpy.matrix(X_B - P_G[:,0]).T/numpy.linalg.norm(X_B
+      - P_G[:,0]), 
+                            numpy.matrix(X_B - P_G[:,1]).T/numpy.linalg.norm(X_B
+      - P_G[:,1]), 
+ 
+                            numpy.matrix(X_B - P_G[:,2]).T/numpy.linalg.norm(X_B
+      - P_G[:,2]), 
+ 
+                            numpy.matrix(X_B - P_G[:,3]).T/numpy.linalg.norm(X_B
+      - P_G[:,3])]) 
 
-  dL_on_dPl = numpy.vstack([numpy.matrix(numpy.hstack([P_L[:,0].T/L[0], numpy.zeros(shape=(1,9))])),
-                            numpy.matrix(numpy.hstack([numpy.zeros(shape=(1,3)), P_L[:,1].T/L[1], numpy.zeros(shape=(1,6))])),
-                            numpy.matrix(numpy.hstack([numpy.zeros(shape=(1,6)), P_L[:,2].T/L[2], numpy.zeros(shape=(1,3))])),
-                            numpy.matrix(numpy.hstack([numpy.zeros(shape=(1,9)), P_L[:,3].T/L[3]]))])
+
+  dL_on_dPl = numpy.vstack([numpy.matrix(numpy.hstack([P_L[:,0].T/L[0], 
+                                                       numpy.zeros(shape=(1,9))])),
+                            numpy.matrix(numpy.hstack([numpy.zeros(shape=(1,3)), 
+                                                       P_L[:,1].T/L[1], 
+                                                       numpy.zeros(shape=(1,6))])),
+                            numpy.matrix(numpy.hstack([numpy.zeros(shape=(1,6)), 
+                                                       P_L[:,2].T/L[2], 
+                                                       numpy.zeros(shape=(1,3))])),
+                            numpy.matrix(numpy.hstack([numpy.zeros(shape=(1,9)), 
+                                                       P_L[:,3].T/L[3]]))])
 
   dPl_on_dqa = Jacobian_LegLengths(q_a)
 
@@ -182,19 +226,25 @@ def Jacobian_COB(X_B, q_a, swingLeg):
 
   return J_Xb
 
-def Jacobian_RBj(X_B, q_a, j):
+def Jacobian_RBj(X_B, q_a, j, swingLeg):
   # Jacobian of body rotation
   P_L = RelativeFootPositions(q_a)
 
-  R_B = RotationMatrix(P_L[:,1].T, P_L[:,3].T, P_L[:,2].T)
+  R_B = GetRotationMatrix(q_a, swingLeg)
 
   dPl_on_dqa = Jacobian_LegLengths(q_a)
 
   dXB_on_dqaj = Jacobian_COB(X_B, q_a)[:, j]
 
-  dXB4_on_dqaj = numpy.hstack([dXB_on_dqaj, dXB_on_dqaj, dXB_on_dqaj, dXB_on_dqaj])
+  dXB4_on_dqaj = numpy.hstack([dXB_on_dqaj, 
+                               dXB_on_dqaj, 
+                               dXB_on_dqaj, 
+                               dXB_on_dqaj])
 
-  dPl_on_dqaj = numpy.hstack([dPl_on_dqa[0:3,j], dPl_on_dqa[3:6,j], dPl_on_dqa[6:9,j], dPl_on_dqa[9:12,j]])
+  dPl_on_dqaj = numpy.hstack([dPl_on_dqa[0:3,j], 
+                              dPl_on_dqa[3:6,j], 
+                              dPl_on_dqa[6:9,j], 
+                              dPl_on_dqa[9:12,j]])
 
   J_RBj = -(dXB4_on_dqaj + dPl_on_dqaj)*numpy.linalg.pinv(P_L)
   
@@ -228,7 +278,7 @@ def Jacobian_SwingFoot(X_B, q_a, leg=1):
     if j != 3*(leg-1) and j != 3*(leg-1)+1 and j != 3*(leg-1)+2:
       dXB_on_dqaj = Jacobian_COB(X_B, q_a)[:, j]
 
-      J_RBj = Jacobian_RBj(X_B, q_a, j)
+      J_RBj = Jacobian_RBj(X_B, q_a, j, leg)
 
     else:
       dXB_on_dqaj = 0
@@ -261,16 +311,16 @@ def RotationMatrix(P1, P2, P3):
 
   return RodriguesRotation(n2, n1)
 
-def GetRotationMatrix(q_a, leg):
+def GetRotationMatrix(q_a, swingLeg):
   P_L = RelativeFootPositions(q_a)
 
-  if leg == 1:
+  if swingLeg == 1:
     R_B = RotationMatrix(P_L[:,1].T, P_L[:,3].T, P_L[:,2].T)
-  elif leg == 2:
+  elif swingLeg == 2:
     R_B = RotationMatrix(P_L[:,3].T, P_L[:,2].T, P_L[:,0].T)
-  elif leg == 3:
+  elif swingLeg == 3:
     R_B = RotationMatrix(P_L[:,0].T, P_L[:,1].T, P_L[:,3].T)
-  elif leg == 4:
+  elif swingLeg == 4:
     R_B = RotationMatrix(P_L[:,2].T, P_L[:,0].T, P_L[:,1].T)
 
   return R_B
@@ -295,16 +345,6 @@ def RodriguesRotation(n1, n2):
   
   return R
 
-def RotationMatrix_PRY(yaw, pitch,roll):
-  alpha = yaw
-  beta = pitch
-  gamma = roll
-  R = numpy.matrix([[math.cos(alpha)*math.cos(beta), math.cos(alpha)*math.sin(beta)*math.sin(gamma)-math.sin(alpha)*math.cos(gamma), math.cos(alpha)*math.sin(beta)*math.cos(gamma)+math.sin(alpha)*math.sin(gamma)],
-                    [math.sin(alpha)*math.cos(beta), math.sin(alpha)*math.sin(beta)*math.sin(gamma)+math.cos(alpha)*math.cos(gamma), math.sin(alpha)*math.sin(beta)*math.cos(gamma)-math.cos(alpha)*math.sin(gamma)],
-                    [-math.sin(beta), math.cos(beta)*math.sin(gamma), math.cos(beta)*math.cos(gamma)]])
-
-  return R
-
 def Trilateration(P1, P2, P3, A, B, C):
 
   G = numpy.matrix([[P1[0,0], P1[1,0], P1[2,0]],
@@ -312,8 +352,8 @@ def Trilateration(P1, P2, P3, A, B, C):
                     [P3[0,0], P3[1,0], P3[2,0]]]) 
 
   h = 1.0/2.0*numpy.matrix([[P1[0,0]**2 + P1[1,0]**2 + P1[2,0]**2 - A**2],
-                        [P2[0,0]**2 + P2[1,0]**2 + P2[2,0]**2 - B**2],
-                        [P3[0,0]**2 + P3[1,0]**2 + P3[2,0]**2 - C**2]])
+                            [P2[0,0]**2 + P2[1,0]**2 + P2[2,0]**2 - B**2],
+                            [P3[0,0]**2 + P3[1,0]**2 + P3[2,0]**2 - C**2]])
 
   return numpy.linalg.pinv(G)*h
 
@@ -352,11 +392,12 @@ def InverseKinematics_COB(q_init, X_G, swingLeg):
   X_B_Current = numpy.matrix([[0.0], [0.0], [0.0]])
 
   maxIter = 100
-  accuracy = 0.05
+  accuracy = 1.0
 
   i = 0
   qa = q_init
   while numpy.linalg.norm(X_G - X_B_Current) > accuracy and i < maxIter:
+    
     J = Jacobian_COB(X_B_Current, qa, swingLeg);
 
     dq = numpy.squeeze(numpy.asarray(numpy.linalg.pinv(J)*(X_G - X_B_Current)))
@@ -380,6 +421,7 @@ def InverseKinematics_COB_SL(q_init, X_G, swingLeg):
   # gives configuration q to move to goal state X_G relative to current state
 
   X_G = numpy.matrix([[X_G.item(0)], [X_G.item(1)], [X_G.item(2)]])
+
   X_B_Current = numpy.matrix([[0.0], [0.0], [0.0]])
 
   maxIter = 100
@@ -391,7 +433,11 @@ def InverseKinematics_COB_SL(q_init, X_G, swingLeg):
   while numpy.linalg.norm(X_G - X_B_Current) > accuracy and i < maxIter:
     X_dot = X_G - X_B_Current
   
-    R_B = GetRotationMatrix(qa, swingLeg)
+    if swingLeg is None:
+      # use some leg as swingleg anyway to determine rotation of body
+      R_B = GetRotationMatrix(qa, 1)
+    else:
+      R_B = GetRotationMatrix(qa, swingLeg)
 
     P_L_dot = R_B.T*(-X_dot)
   
@@ -400,10 +446,16 @@ def InverseKinematics_COB_SL(q_init, X_G, swingLeg):
     J_leg3 = Jacobian_SL(qa[6], qa[7], qa[8], 3)    
     J_leg4 = Jacobian_SL(qa[9], qa[10], qa[11], 4)  
 
-    qa1 = numpy.linalg.pinv(J_leg1)*P_L_dot
-    qa2 = numpy.linalg.pinv(J_leg2)*P_L_dot
-    qa3 = numpy.linalg.pinv(J_leg3)*P_L_dot
-    qa4 = numpy.linalg.pinv(J_leg4)*P_L_dot
+    qa1 = qa2 = qa3 = qa4 = numpy.zeros(shape=(3,1))
+
+    if swingLeg is not 1:
+      qa1 = numpy.linalg.pinv(J_leg1)*P_L_dot
+    if swingLeg is not 2:
+      qa2 = numpy.linalg.pinv(J_leg2)*P_L_dot
+    if swingLeg is not 3:
+      qa3 = numpy.linalg.pinv(J_leg3)*P_L_dot
+    if swingLeg is not 4:
+      qa4 = numpy.linalg.pinv(J_leg4)*P_L_dot
 
     qa = qa + numpy.hstack([qa1.T.tolist()[0], 
                             qa2.T.tolist()[0],  
@@ -412,7 +464,10 @@ def InverseKinematics_COB_SL(q_init, X_G, swingLeg):
 
     qa = AngleLimits(qa)
 
-    X_B_Current = Relative_COB(q_init, qa, swingLeg) 
+    if swingLeg is None:
+      X_B_Current = Relative_COB(q_init, qa, 1) 
+    else:
+      X_B_Current = Relative_COB(q_init, qa, swingLeg) 
 
     i += 1
      

@@ -13,6 +13,7 @@ Axes3D	Oncilla/OncillaVisualization.py	/^from mpl_toolkits.mplot3d import Axes3D
 B	Oncilla/Maths.py	/^B = sympy.Symbol('B')$/;"	v
 Bs	Oncilla/OncillaKinematics.py	/^Bs = [56.0, 56.0, 65.0, 65.0]$/;"	v
 Build_RRT	Planning/RRT.py	/^def Build_RRT(q_init, numberOfNodes, delta_q, terrain, q_limits):$/;"	f
+Build_TS_RRT	Planning/TS_RRT.py	/^def Build_TS_RRT(q0, xGoal, K, dq, triangleGoal, xLimits):$/;"	f
 C	Oncilla/Maths.py	/^C = sympy.Symbol('C')$/;"	v
 CenterOfFrontStabilityLine	Oncilla/OncillaMovement.py	/^def CenterOfFrontStabilityLine(q_current, swingLeg):$/;"	f
 CenterOfLineSegment	Oncilla/OncillaMovement.py	/^def CenterOfLineSegment(P1, P2):$/;"	f
@@ -35,7 +36,7 @@ FRONT_LEFT	Oncilla/Oncilla2.py	/^    FRONT_LEFT = 1$/;"	v	class:OncillaHardware
 FRONT_RIGHT	Oncilla/Oncilla2.py	/^    FRONT_RIGHT = 2$/;"	v	class:OncillaHardware
 FootPositions_SL	Oncilla/OncillaKinematics.py	/^def FootPositions_SL(alpha, beta, gamma, leg):$/;"	f
 GaitSelection	Oncilla/OncillaMovement.py	/^def GaitSelection(q_current, u, prevLeg):$/;"	f
-GetRotationMatrix	Oncilla/OncillaKinematics.py	/^def GetRotationMatrix(q_a, leg):$/;"	f
+GetRotationMatrix	Oncilla/OncillaKinematics.py	/^def GetRotationMatrix(q_a, swingLeg):$/;"	f
 HIND_LEFT	Oncilla/Oncilla2.py	/^    HIND_LEFT = 3$/;"	v	class:OncillaHardware
 HIND_RIGHT	Oncilla/Oncilla2.py	/^    HIND_RIGHT = 4$/;"	v	class:OncillaHardware
 HIP	Oncilla/Oncilla2.py	/^    HIP = 0$/;"	v	class:OncillaHardware
@@ -46,7 +47,7 @@ InverseKinematics_SL	Oncilla/OncillaKinematics.py	/^def InverseKinematics_SL(q_i
 J	Oncilla/Maths.py	/^J = sympy.simplify(tip.jacobian(q))$/;"	v
 Jacobian_COB	Oncilla/OncillaKinematics.py	/^def Jacobian_COB(X_B, q_a, swingLeg):$/;"	f
 Jacobian_LegLengths	Oncilla/OncillaKinematics.py	/^def Jacobian_LegLengths(q_a):$/;"	f
-Jacobian_RBj	Oncilla/OncillaKinematics.py	/^def Jacobian_RBj(X_B, q_a, j):$/;"	f
+Jacobian_RBj	Oncilla/OncillaKinematics.py	/^def Jacobian_RBj(X_B, q_a, j, swingLeg):$/;"	f
 Jacobian_SL	Oncilla/OncillaKinematics.py	/^def Jacobian_SL(alpha, beta, gamma, leg):$/;"	f
 Jacobian_SwingFoot	Oncilla/OncillaKinematics.py	/^def Jacobian_SwingFoot(X_B, q_a, leg=1):$/;"	f
 KNEE	Oncilla/Oncilla2.py	/^    KNEE = 1$/;"	v	class:OncillaHardware
@@ -56,7 +57,7 @@ MathExtra	Planning/RRT.py	/^import MathExtra$/;"	i
 MathExtra	Planning/TS_RRT.py	/^import MathExtra$/;"	i
 MaxLegLength	Oncilla/OncillaMovement.py	/^def MaxLegLength(leg):$/;"	f
 MaximumReachPoint	Oncilla/OncillaMovement.py	/^def MaximumReachPoint(q_current, leg):$/;"	f
-MoveCOB	Oncilla/OncillaMovement.py	/^def MoveCOB(oncilla, X_goal, q_init, q_ref, speed, swingLeg):$/;"	f
+MoveCOB	Oncilla/OncillaMovement.py	/^def MoveCOB(oncilla, X_goal, q_init, speed, swingLeg):$/;"	f
 MoveToConfiguration	Oncilla/OncillaMovement.py	/^def MoveToConfiguration(oncilla, q_start, q_goal):$/;"	f
 Node	Planning/RRT.py	/^class Node:$/;"	c
 OK	Oncilla/OncillaMovement.py	/^import OncillaKinematics as OK$/;"	i
@@ -74,6 +75,7 @@ OK	Test/Test_Servo.py	/^import OncillaKinematics as OK$/;"	i
 OK	Test/Test_StaticGait.py	/^import OncillaKinematics as OK$/;"	i
 OK	Test/Test_SupportPolygon.py	/^import OncillaKinematics as OK$/;"	i
 OK	Test/Test_ThreeLeggedStance.py	/^import OncillaKinematics as OK$/;"	i
+OK	Test/Test_TriangleGoalRRT.py	/^import OncillaKinematics as OK$/;"	i
 OM	Test/Test_Cirkel.py	/^import OncillaMovement as OM$/;"	i
 OM	Test/Test_InverseKinematics_SL.py	/^import OncillaMovement as OM$/;"	i
 OM	Test/Test_MaxLegLengths.py	/^import OncillaMovement as OM$/;"	i
@@ -133,27 +135,25 @@ RRT	Test/Test_RRT.py	/^import RRT$/;"	i
 RRT	Test/Test_RRT_OneTree.py	/^import RRT$/;"	i
 RRT	Test/Test_RRT_OneTree_Terrain.py	/^import RRT$/;"	i
 RRT_Connect_Planner	Planning/RRT.py	/^def RRT_Connect_Planner(q_init, q_goal, numberOfNodes, delta_q, terrain, q_limits):$/;"	f
-RRT_TriangleGoal_Planner	Planning/TS_RRT.py	/^def RRT_TriangleGoal_Planner(x_init, q_init, numberOfNodes, delta_x, triangleGoal,$/;"	f
 ReducedSupportPolygon	Oncilla/OncillaMovement.py	/^def ReducedSupportPolygon(q, margin, swingLeg):$/;"	f
 RelativeFootPositions	Oncilla/OncillaKinematics.py	/^def RelativeFootPositions(q_a):$/;"	f
 RelativeKneePositions	Oncilla/OncillaKinematics.py	/^def RelativeKneePositions(q_a):$/;"	f
 Relative_COB	Oncilla/OncillaKinematics.py	/^def Relative_COB(q_start, q_current, swingLeg):$/;"	f
 RodriguesRotation	Oncilla/OncillaKinematics.py	/^def RodriguesRotation(n1, n2):$/;"	f
 RotationMatrix	Oncilla/OncillaKinematics.py	/^def RotationMatrix(P1, P2, P3):$/;"	f
-RotationMatrix_PRY	Oncilla/OncillaKinematics.py	/^def RotationMatrix_PRY(yaw, pitch,roll):$/;"	f
 Rs	Oncilla/OncillaKinematics.py	/^Rs = [227.0\/2.0, 227.0\/2.0, -227.0\/2.0, -227.0\/2.0]$/;"	v
 S	Oncilla/Maths.py	/^S = sympy.Symbol('S')$/;"	v
 SERVO	Oncilla/Oncilla2.py	/^    SERVO = 2$/;"	v	class:OncillaHardware
 SIMULATION	Oncilla/Oncilla2.py	/^    SIMULATION = False$/;"	v	class:OncillaHardware
 SameSide	Global/MathExtra.py	/^def SameSide(p1,p2, a,b):$/;"	f
+ShowPoint	Oncilla/Oncilla2.py	/^    def ShowPoint(self, point):$/;"	m	class:OncillaHardware
+ShowPoint	Oncilla/OncillaVisualization.py	/^def ShowPoint(oncilla, point):$/;"	f
 Ss	Oncilla/OncillaKinematics.py	/^Ss = [-137.5\/2.0, 137.5\/2.0, -137.5\/2.0, 137.5\/2.0]$/;"	v
 StaticGait	Oncilla/OncillaMovement.py	/^def StaticGait(oncilla, q_current, u):$/;"	f
 SupportPolygonCentroid	Oncilla/OncillaMovement.py	/^def SupportPolygonCentroid(q_current, swingLeg=1):$/;"	f
 SwingLeg	Oncilla/OncillaMovement.py	/^def SwingLeg(oncilla, q_current, leg):$/;"	f
 SwingShift	Oncilla/OncillaMovement.py	/^def SwingShift(oncilla, q_current, leg):$/;"	f
 TRAPPED	Planning/RRT.py	/^TRAPPED = 3$/;"	v
-TS_Control	Planning/TS_RRT.py	/^def TS_Control(q_near, x_near, x_rand):$/;"	f
-TS_Extend	Planning/TS_RRT.py	/^def TS_Extend(tree, x_rand, delta_x, terrain):$/;"	f
 TS_Node	Planning/TS_RRT.py	/^class TS_Node:$/;"	c
 TS_RRT	Test/Test_TriangleGoalRRT.py	/^import TS_RRT$/;"	i
 TS_Tree	Planning/TS_RRT.py	/^class TS_Tree:$/;"	c
@@ -181,7 +181,7 @@ X_goal	Test/Test_MoveInZPLane.py	/^  X_goal = numpy.matrix([[20.0],[-15.0],[-15.
 X_goal	Test/Test_MoveInZPLane.py	/^  X_goal = numpy.matrix([[20.0],[15.0],[15.0]])$/;"	v
 X_goal	Test/Test_MoveInZPLane.py	/^X_goal = numpy.matrix([[20.0],[0.0],[0.0]])$/;"	v
 X_goal	Test/Test_Pompen.py	/^  X_goal = numpy.matrix([[0.0],[0.0],[0.0]])$/;"	v
-X_goal	Test/Test_Pompen.py	/^  X_goal = numpy.matrix([[30.0],[0.0],[0.0]])$/;"	v
+X_goal	Test/Test_Pompen.py	/^  X_goal = numpy.matrix([[20.0],[0.0],[0.0]])$/;"	v
 X_goal	Test/Test_QuadShift.py	/^X_goal = numpy.array([[20.0], [0.0], [0.0]])$/;"	v
 X_goal	Test/Test_StaticGait.py	/^X_goal = numpy.array([[15], [0.0], [0.0]])$/;"	v
 YDIM	Oncilla/Oncilla2.py	/^YDIM = 400$/;"	v
@@ -192,11 +192,11 @@ __del__	Oncilla/Oncilla2.py	/^    def __del__(self):$/;"	m	class:OncillaHardware
 __init__	Oncilla/Oncilla2.py	/^    def __init__(self, simulation=False, IP = '157.193.205.249', PORT=31708):$/;"	m	class:OncillaHardware
 __init__	Planning/RRT.py	/^  def __init__(self, q, tree=None):$/;"	m	class:Node
 __init__	Planning/RRT.py	/^  def __init__(self, q_init):$/;"	m	class:Tree
-__init__	Planning/TS_RRT.py	/^  def __init__(self, x, q, tree=None):$/;"	m	class:TS_Node
-__init__	Planning/TS_RRT.py	/^  def __init__(self, x_init, q_init):$/;"	m	class:TS_Tree
+__init__	Planning/TS_RRT.py	/^    def __init__(self, x, q, tree=None):$/;"	m	class:TS_Node
+__init__	Planning/TS_RRT.py	/^  def __init__(self, q0):$/;"	m	class:TS_Tree
 _anglesToFloat	Oncilla/Oncilla2.py	/^    def _anglesToFloat(self,angles):$/;"	m	class:OncillaHardware
 addChild	Planning/RRT.py	/^  def addChild(self, child):$/;"	m	class:Node
-addChild	Planning/TS_RRT.py	/^  def addChild(self, child):$/;"	m	class:TS_Node
+addChild	Planning/TS_RRT.py	/^    def addChild(self, child):$/;"	m	class:TS_Node
 alpha	Oncilla/Maths.py	/^alpha = sympy.Symbol('alpha')$/;"	v
 alpha	Test/Test_ReducedSupportPolygon.py	/^  alpha=0.5))$/;"	v
 alpha1	Test/Test_Servo.py	/^alpha1 = -10.0*math.pi\/180.0$/;"	v
@@ -232,6 +232,7 @@ delta_q	Test/Test_RRT.py	/^delta_q = 1.0*10$/;"	v
 delta_q	Test/Test_RRT_OneTree.py	/^delta_q = 1.0*10$/;"	v
 delta_q	Test/Test_RRT_OneTree_Terrain.py	/^delta_q = 1.0*10$/;"	v
 euclidian_distance	Planning/RRT.py	/^def euclidian_distance(node1, node2):$/;"	f
+euclidian_distance	Planning/TS_RRT.py	/^def euclidian_distance(x1, x2):$/;"	f
 feet	Test/Test_ReducedSupportPolygon.py	/^feet = OK.RelativeFootPositions(q_ref)$/;"	v
 feet	Test/Test_ReducedSupportPolygon.py	/^feet = numpy.delete(feet, 0, axis=0)$/;"	v
 fixCenter	Oncilla/Oncilla2.py	/^    fixCenter = False$/;"	v	class:OncillaHardware
@@ -299,7 +300,7 @@ matplotlib	Test/Test_ThreeLeggedStance.py	/^import matplotlib.pyplot as plt$/;"	
 matplotlib	Test/Test_TriangleGoalRRT.py	/^import matplotlib.pyplot as plt$/;"	i
 matplotlib	Test/Test_Triangles.py	/^import matplotlib.pyplot as plt$/;"	i
 nearestNode	Planning/RRT.py	/^  def nearestNode(self, startNode, node):$/;"	m	class:Tree
-nearestNode	Planning/TS_RRT.py	/^  def nearestNode(self, startNode, node):$/;"	m	class:TS_Tree
+nearestNode	Planning/TS_RRT.py	/^  def nearestNode(self, startNode, xRand):$/;"	m	class:TS_Tree
 np	Oncilla/OncillaVisualization.py	/^import numpy as np$/;"	i
 numberOfNodes	Test/Test_RRT.py	/^numberOfNodes = 1000$/;"	v
 numberOfNodes	Test/Test_RRT_OneTree.py	/^numberOfNodes = 1000$/;"	v
@@ -365,15 +366,15 @@ q	Test/Test_Cirkel.py	/^    q = OM.Move_COB(oh, X_goal, q, q_start, speed)$/;"	v
 q	Test/Test_Cirkel.py	/^q = OM.Move_COB(oh, X_goal, q_start, q_start, speed)$/;"	v
 q	Test/Test_MoveInZPLane.py	/^  q = OM.Move_COB(oh, X_goal, q, q_start, speed)$/;"	v
 q	Test/Test_MoveInZPLane.py	/^q = OM.Move_COB(oh, X_goal, q_start, q_start, speed)$/;"	v
-q	Test/Test_Pompen.py	/^  q = OM.Move_COB(oh, X_goal, q, q_start, speed, 1)$/;"	v
+q	Test/Test_Pompen.py	/^  q = OM.MoveCOB(oh, X_goal, q, q_start, speed, None)$/;"	v
 q	Test/Test_Pompen.py	/^q = q_start$/;"	v
 q	Test/Test_QuadShift.py	/^q = OM.Move_COB(oh, X_goal, q_start, q_start, speed, leg) $/;"	v
 q	Test/Test_QuadShift.py	/^q = OM.QuadShift(oh, q, leg)$/;"	v
-q	Test/Test_StaticGait.py	/^q = OM.MoveCOB(oh, X_goal, q_start, q_start, speed, swingLeg=1) $/;"	v
+q	Test/Test_StaticGait.py	/^q = OM.MoveCOB(oh, X_goal, q_start, speed, None) $/;"	v
 q	Test/Test_StaticGait.py	/^q = OM.StaticGait(oh, q, u)$/;"	v
+q0	Test/Test_TriangleGoalRRT.py	/^q0 = numpy.array([0.4829, 1.6494, 1.5801, 0.7607, 1.9062, 1.6214, 0.6808,$/;"	v
 q1	Test/Test_Servo.py	/^q1 = numpy.array([alpha1, beta1, gamma1, alpha2, beta2, gamma2, alpha3, beta3, gamma3, alpha4, beta4, gamma4])$/;"	v
 q2	Test/Test_Servo.py	/^q2 = numpy.array([alpha1, beta1, gamma1, alpha2, beta2, gamma2, alpha3, beta3, gamma3, alpha4, beta4, gamma4])$/;"	v
-q_init	Test/Test_TriangleGoalRRT.py	/^q_init = numpy.array([0.4829, 1.6494, 1.5801, 0.7607, 1.9062, 1.6214, 0.6808,$/;"	v
 q_limits	Oncilla/OncillaKinematics.py	/^q_limits = math.pi\/180.0*numpy.array([[-43., 85., 81.02, $/;"	v
 q_limits	Test/Test_RRT.py	/^q_limits = numpy.array([[0.0, 0.0],[500.0, 500.0]])$/;"	v
 q_limits	Test/Test_RRT_OneTree.py	/^q_limits = numpy.array([[0.0, 0.0],[500.0, 500.0]])$/;"	v
@@ -381,6 +382,7 @@ q_limits	Test/Test_RRT_OneTree_Terrain.py	/^q_limits = numpy.array([[0.0, 0.0],[
 q_ref	Oncilla/Oncilla2.py	/^    q_ref = numpy.array([0.0, 135.0, 90.0, $/;"	v	class:OncillaHardware
 q_ref	Test/Test_InverseKinematics_SL.py	/^q_ref = numpy.array([0.0, 135.0, 90.0, $/;"	v
 q_ref	Test/Test_ReducedSupportPolygon.py	/^q_ref = numpy.array([0.0, 135.0, 90.0, $/;"	v
+q_ref	Test/Test_TriangleGoalRRT.py	/^q_ref = numpy.array([0.0, 135.0, 90.0, $/;"	v
 q_start	Test/Test_Cirkel.py	/^q_start = numpy.array([0.0, 135.0, 90.0, $/;"	v
 q_start	Test/Test_MaxLegLengths.py	/^q_start = numpy.array([0.0, 135.0, 90.0, $/;"	v
 q_start	Test/Test_MoveInZPLane.py	/^q_start = numpy.array([alpha1, beta1, gamma1, $/;"	v
@@ -391,6 +393,7 @@ q_start	Test/Test_StaticGait.py	/^q_start = numpy.array([alpha1, beta1, gamma1, 
 q_start	Test/Test_ThreeLeggedStance.py	/^q_start = numpy.array([alpha1, beta1, gamma1, alpha2, beta2, gamma2, alpha3, beta3, gamma3, alpha4, beta4, gamma4])$/;"	v
 q_supported	Test/Test_SupportPolygon.py	/^q_supported = numpy.array([alpha1, beta1, gamma1, alpha2, beta2, gamma2, alpha3, beta3, gamma3, alpha4, beta4, gamma4])$/;"	v
 r	Test/Test_Cirkel.py	/^r = 20.0$/;"	v
+random	Planning/TS_RRT.py	/^import random $/;"	i
 red	Oncilla/OncillaVisualization.py	/^red = 255, 0, 0 $/;"	v
 red	Test/Test_RRT.py	/^red = 255, 0, 0$/;"	v
 red	Test/Test_RRT_OneTree.py	/^red = 255, 0, 0$/;"	v
@@ -418,6 +421,7 @@ speed	Test/Test_Servo.py	/^speed = 30.0$/;"	v
 speed	Test/Test_StaticGait.py	/^speed = 30.0$/;"	v
 supportFeet	Test/Test_ReducedSupportPolygon.py	/^supportFeet = numpy.delete(feet, leg-1, axis=1)$/;"	v
 swingLeg	Oncilla/Oncilla2.py	/^    swingLeg = 1$/;"	v	class:OncillaHardware
+swingLeg	Test/Test_TriangleGoalRRT.py	/^swingLeg = 1$/;"	v
 sympy	Oncilla/Maths.py	/^import sympy $/;"	i
 sympy	Oncilla/Maths.py	/^import sympy$/;"	i
 sys	Oncilla/OncillaMovement.py	/^import sys$/;"	i
@@ -455,7 +459,7 @@ tip	Oncilla/Maths.py	/^tip = tip[0:3,0]$/;"	v
 tool	Oncilla/Maths.py	/^tool = sympy.Matrix(((0.0), (0.0), (0.0), (1.0))) # No tool so 0,0,0$/;"	v
 tree	Test/Test_RRT_OneTree.py	/^tree = RRT.Build_RRT(numpy.array([250.0, 250.0]), numberOfNodes, delta_q, terrain, q_limits)$/;"	v
 tree	Test/Test_RRT_OneTree_Terrain.py	/^tree = RRT.Build_RRT(numpy.array([250.0, 250.0]), numberOfNodes, delta_q, terrain, q_limits)$/;"	v
-tree	Test/Test_TriangleGoalRRT.py	/^tree = TS_RRT.RRT_TriangleGoal_Planner(x_init, q_init, 1000, 1.0, triangleGoal,$/;"	v
+tree	Test/Test_TriangleGoalRRT.py	/^tree = TS_RRT.Build_TS_RRT(q0, xGoal, 200, 0.2, triangleGoal, xLimits)$/;"	v
 triangleGoal	Test/Test_TriangleGoalRRT.py	/^triangleGoal = [P1, P2, P3]$/;"	v
 u	Test/Test_StaticGait.py	/^u = numpy.array([0.0, 1.0, 0.0])$/;"	v
 u21	Test/Test_Triangles.py	/^u21 = (P2 - P1)\/numpy.linalg.norm(P2 - P1)$/;"	v
@@ -466,9 +470,8 @@ white	Test/Test_RRT.py	/^white = 255, 255, 255$/;"	v
 white	Test/Test_RRT_OneTree.py	/^white = 255, 255, 255$/;"	v
 white	Test/Test_RRT_OneTree_Terrain.py	/^white = 255, 255, 255$/;"	v
 x	Test/Test_Cirkel.py	/^    x = xc + r*math.cos(t) $/;"	v
-x_ideal	Test/Test_TriangleGoalRRT.py	/^x_ideal = numpy.array([0., 13.2436, -23.0818])$/;"	v
-x_init	Test/Test_TriangleGoalRRT.py	/^x_init = numpy.array([0.0, 0.0, 0.0])$/;"	v
-x_limits	Test/Test_TriangleGoalRRT.py	/^x_limits = numpy.array([[-50.0, -50.0], [50.0, 50.0]])$/;"	v
+xGoal	Test/Test_TriangleGoalRRT.py	/^xGoal = numpy.array([0., 13.2436, -23.0818])$/;"	v
+xLimits	Test/Test_TriangleGoalRRT.py	/^xLimits = numpy.array([[0.0, -10.0, -10.0], [10.0, 10.0, 10.0]])$/;"	v
 xc	Test/Test_Cirkel.py	/^xc = 0.0$/;"	v
 y	Test/Test_Cirkel.py	/^    y = yc + r*math.sin(t) $/;"	v
 yc	Test/Test_Cirkel.py	/^yc = 0.0$/;"	v

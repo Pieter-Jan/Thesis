@@ -23,9 +23,10 @@ gamma1 = gamma2 = 95.0*math.pi/180.0
 
 alpha3 = alpha4 = 25.0*math.pi/180.0
 beta3 = beta4 = 115.0*math.pi/180.0
-gamma3 = gamma4 = 100.0*math.pi/180.0
+gamma3 = gamma4 = 95.0*math.pi/180.0
 
-q_start = numpy.array([alpha1, beta1, gamma1, alpha2, beta2, gamma2, alpha3, beta3, gamma3, alpha4, beta4, gamma4])
+q_start = numpy.array([alpha1, beta1, gamma1, alpha2, beta2, gamma2, 
+                       alpha3, beta3, gamma3, alpha4, beta4, gamma4])
 if oh is not None:
   reply = oh.sendConfiguration(q_start)
 
@@ -35,8 +36,8 @@ speed = 20.0
 
 q = q_start
 for i in range(0, 10):
-  X_goal = numpy.matrix([[0.0],[0.0],[0.0]])
-  q = OM.Move_COB(oh, X_goal, q, q_start, speed, 1)
+  X_goal = numpy.matrix([[20.0],[0.0],[0.0]])
+  q = OM.MoveCOB(oh, X_goal, q, q_start, speed, None)
 
-  X_goal = numpy.matrix([[30.0],[0.0],[0.0]])
-  q = OM.Move_COB(oh, X_goal, q, q_start, speed, 1)
+  X_goal = numpy.matrix([[0.0],[0.0],[0.0]])
+  q = OM.MoveCOB(oh, X_goal, q, q_start, speed, None)

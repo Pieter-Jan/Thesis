@@ -77,6 +77,11 @@ def VisualizeRobot(oncilla, q, showSupportPolygon=False):
 
   pygame.display.update()
 
+def ShowPoint(oncilla, point):
+  conv = np.asarray([int(700 + point[0]), int(200 + point[1])])
+  pygame.draw.circle(oncilla.screen, green, conv, 4)
+  pygame.display.update()
+
 def VisualizeRobot2(q):
   # 3D
 

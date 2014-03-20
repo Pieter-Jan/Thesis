@@ -96,6 +96,10 @@ class OncillaHardware:
       else:
         OV.VisualizeRobot(self, q, showSupportPolygon=self.showSupportPolygon)
 
+    def ShowPoint(self, point):
+        if self.SIMULATION == True:
+            OV.ShowPoint(self, point)
+
     def getConfiguration(self):
       # Get q
       # TODO
